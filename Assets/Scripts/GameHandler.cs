@@ -5,10 +5,10 @@ public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
 
-    [SerializeField] public Camera cam;
-    [SerializeField] private GameObject _playerPrefab;
-    [SerializeField] private EnemyData[] _enemyDatas;
-    [SerializeField] private GameObject[] _enemyPrefabs;
+    public Camera cam;
+    public GameObject _playerPrefab;
+    public EnemyData[] _enemyDatas;
+    public GameObject[] _enemyPrefabs;
     [SerializeField] private GameObject[] _enemySpawners;
 
     private ISceneObject _player;
@@ -64,7 +64,7 @@ public class GameHandler : MonoBehaviour
     {
         foreach (GameObject spawner in _enemySpawners)
         {
-            var spawnerGO = new EnemySpawner(spawner, _enemyPrefabs[0], spawner.transform, _enemyDatas[0],_player.gameobject.transform);
+            var spawnerGO = new EnemySpawner(spawner, spawner.transform, _player.gameobject.transform);
         }
     }
 }

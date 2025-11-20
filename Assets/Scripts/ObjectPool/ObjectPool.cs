@@ -49,4 +49,16 @@ public class ObjectPool<T> where T : IPoolable
         item.active = false;
         _inactivePool.Add(item);
     }
+
+    public void DestroyAll(Action<T> destroyAction)
+    {
+        foreach(var item in _activePool)
+            destroyAction(item);
+
+        foreach (var item in _inactivePool)
+            destroyAction(item);
+
+        _activePool.Clear();
+        _inactivePool.Clear();
+    }
 }

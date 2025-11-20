@@ -6,7 +6,7 @@ public class Bullet : IBullet, ISceneObject
 {
     public static readonly Dictionary<Collider2D, Bullet> collLookup = new Dictionary<Collider2D, Bullet>();
 
-    public HashSet<ElementalBulletTypes> elementalBulletTypes { get; set; } = new HashSet<ElementalBulletTypes>() { ElementalBulletTypes.Normal };
+    public HashSet<ElementalTypes> elementalBulletTypes { get; set; } = new HashSet<ElementalTypes>() { ElementalTypes.Normal };
     public int damage { get; set; }
     public Color color { get; set; }
     public bool active { get; set; }

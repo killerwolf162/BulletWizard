@@ -2,13 +2,6 @@ using System;
 using UnityEngine;
 using System.Collections.Generic;
 
-public enum spellState
-{
-    normal,
-    fire,
-    ice
-}
-
 public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShooter
 {
     [Header("StateMachine")]
@@ -95,8 +88,11 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         //update loop statemachine
         stateMachine?.Update();
 
+        if (col != null)
+        {
+            OnCollisionEnter2D(col);
+        }
         SetCameraPosition();
-        OnCollisionEnter2D(col);
     }
 
     private void TakeDamage(int amount)
@@ -157,6 +153,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     {
         GameHandler.instance.cam.transform.position = gameobject.transform.position + new Vector3(0, 0, -10);
     }
+
     private void OnCollisionEnter2D(Collider2D collider)
     {
         List<Collider2D> overlappingColliders = new List<Collider2D>();

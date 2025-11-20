@@ -5,27 +5,25 @@ public class EnemySpawner : ISceneObject
     public GameObject gameobject { get; private set; }
     public List<EnemyBehaviour> ownedEnemies = new List<EnemyBehaviour>();
 
-    private GameObject _enemyPrefab;
     private Transform _spawnPos;
-    private EnemyData _data;
     private Transform _playerPos;
-    private int maxEnemies = 1;
+    private int _maxEnemies = 1;
 
+    private GameHandler _instance;
 
     //constructor
-    public EnemySpawner(GameObject spawner, GameObject enemyPrefab, Transform spawnPos, EnemyData data, Transform playerPos)
+    public EnemySpawner(GameObject spawner, Transform spawnPos, Transform playerPos)
     {
-        this.gameobject = gameobject;
+        this.gameobject = spawner;
         _spawnPos = spawnPos;
-        _enemyPrefab = enemyPrefab;
-        _data = data;
         _playerPos = playerPos;
         Start();
     }
 
     public virtual void Start()
     {
-        GameHandler.instance.Subscribe(this);
+        _instance = GameHandler.instance;
+        _instance.Subscribe(this);
     }
 
     public virtual void Update()
@@ -38,11 +36,32 @@ public class EnemySpawner : ISceneObject
     private void SpawnEnemy()
     {
         // Instantiate the enemy from a prefab
-        if(ownedEnemies.Count < maxEnemies)
+        if(ownedEnemies.Count < _maxEnemies)
         {
-            GameObject newEnemyGo = GameHandler.Instantiate(_enemyPrefab);
+            int idx = 0;
+            int data = 0;
+            int type = 0;
+            var RNG = Random.Range(0, 100);
+
+            if (RNG < 50)
+            {
+                idx = 0; 
+                type = (int)ElementalTypes.Normal;
+            }               
+            else if (RNG > 50 && RNG < 75)
+            {
+                idx = 1;
+                type = (int)ElementalTypes.Fire;
+            }
+            else if (RNG > 75)
+            {
+                idx = 2;
+                type = (int)ElementalTypes.Ice;
+            }
+
+            GameObject newEnemyGo = GameHandler.Instantiate(_instance._enemyPrefabs[idx]);
             var _pos = _spawnPos.position;
-            EnemyBehaviour enemy = new EnemyBehaviour(this, newEnemyGo, _playerPos, _data, _spawnPos.position);
+            EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, _instance._enemyDatas[data], _spawnPos.position);
             ownedEnemies.Add(enemy);
         }       
     }

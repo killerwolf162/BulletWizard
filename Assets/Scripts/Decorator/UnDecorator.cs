@@ -2,10 +2,10 @@
 
 public class UnDecorator : BulletDecorator
 {
-    private ElementalBulletTypes bulletType;
+    private ElementalTypes bulletType;
     private Color color;
 
-    public UnDecorator(ElementalBulletTypes bulletType, int damage, Color color)
+    public UnDecorator(ElementalTypes bulletType, int damage, Color color)
     {
         this.bulletType = bulletType;
         this.damage = damage;
@@ -17,7 +17,6 @@ public class UnDecorator : BulletDecorator
     {
         if (bullet.elementalBulletTypes.Contains(bulletType)) // checks if bullet is standard
         {
-            Debug.Log("Bullet is already normal"); 
             return bullet;
         }
         else
@@ -26,7 +25,6 @@ public class UnDecorator : BulletDecorator
             bullet.elementalBulletTypes.Add(bulletType);
             bullet.damage -= damage;
             bullet.color = color;
-            Debug.Log("Bullet Reset to normal");
             return bullet;
         }
     }

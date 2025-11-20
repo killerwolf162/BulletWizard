@@ -9,6 +9,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private Collider2D col;
     private EnemySpawner _spawner;
     public GameObject gameobject { get; private set; }
+    private ElementalTypes _elementType;
 
     [Header("StateMachine")]
     private StateMachine<EnemyBehaviour> stateMachine;
@@ -40,9 +41,10 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
 
     //constructor
-    public EnemyBehaviour(EnemySpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
+    public EnemyBehaviour(ElementalTypes type, EnemySpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
     {
         _player = Player;
+        _elementType = type;
         _name = data.enemyName;
         _speed = data.moveSpeed;
         _damage = data.damage;
@@ -56,7 +58,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public virtual void Start()
     {
-        GameObject bulletObject = Resources.Load("SpiderBullet", typeof(GameObject)) as GameObject;
+        GameObject bulletObject = Resources.Load("spooderBullet", typeof(GameObject)) as GameObject;
         if (_bulletPool._inactivePool == null)
         {
             _bulletPool._inactivePool = new List<Bullet>();
@@ -66,6 +68,12 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         {
             var bulletGO = GameHandler.instance.InstantiateNew(bulletObject);
             var bullet = CreateBullet(bulletGO);
+
+            if (_elementType == ElementalTypes.Fire)
+                bullet.Decorate(new ElementDecorator(ElementalTypes.Fire, _damage, Color.red, true));
+            else if (_elementType == ElementalTypes.Ice)
+                bullet.Decorate(new ElementDecorator(ElementalTypes.Ice, _damage, Color.blue, true));
+
             _bulletPool._inactivePool.Add(bullet);
         }
 
@@ -136,7 +144,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public void OnBulletDie(Bullet _bullet)
     {
-        _bulletPool.ReturnItemToPool(_bullet);
+        if (_bulletPool != null)
+            _bulletPool.ReturnItemToPool(_bullet);
     }
 
     public Vector2 GetAimDirection()
@@ -160,6 +169,12 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     {
         _spawner.ownedEnemies.Remove(this);
         GameHandler.instance.UnSubscribe(this);
+
+        _bulletPool?.DestroyAll(b =>
+        {
+            GameHandler.instance.DestroyObject(b.gameobject);
+        });
+        _bulletPool = null;
         GameHandler.instance.DestroyObject(gameobject);
     }
 

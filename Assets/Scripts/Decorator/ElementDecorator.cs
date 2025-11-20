@@ -2,15 +2,16 @@
 
 public class ElementDecorator : BulletDecorator
 {
-    private ElementalBulletTypes bulletType;
+    private ElementalTypes bulletType;
     private Color color;
+    private bool multiplier;
 
-    public ElementDecorator(ElementalBulletTypes bulletType, int damage, Color color)
+    public ElementDecorator(ElementalTypes bulletType, int damage, Color color, bool multiplier = false)
     {
         this.bulletType = bulletType;
         this.damage = damage;
         this.color = color;
- 
+        this.multiplier = multiplier;
     }
 
     public override IBullet Decorate(IBullet bullet)
@@ -19,11 +20,12 @@ public class ElementDecorator : BulletDecorator
         {
             return bullet;
         }
-        if (bullet.elementalBulletTypes.Contains(ElementalBulletTypes.Normal)) // check if bullet is not decorated
+        if (bullet.elementalBulletTypes.Contains(ElementalTypes.Normal)) // check if bullet is not decorated
         {
             bullet.elementalBulletTypes.Add(bulletType);
-            bullet.elementalBulletTypes.Remove(ElementalBulletTypes.Normal);
-            bullet.damage += damage;
+            bullet.elementalBulletTypes.Remove(ElementalTypes.Normal);
+            if(multiplier)
+                bullet.damage += damage;
             bullet.color = color;
             return bullet;
         }

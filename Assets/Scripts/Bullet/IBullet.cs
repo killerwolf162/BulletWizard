@@ -7,7 +7,7 @@ public interface IBullet : IPoolable
 
     public Color color { get; set; }
 
-    public HashSet<ElementalBulletTypes> elementalBulletTypes { get; set; }
+    public HashSet<ElementalTypes> elementalBulletTypes { get; set; }
 
     public void Decorate(BulletDecorator decorator);
 }

@@ -1,4 +1,4 @@
-public enum ElementalBulletTypes
+public enum ElementalTypes
 {
     Normal = 1,
     Fire = 3,

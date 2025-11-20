@@ -152,8 +152,11 @@ MonoBehaviour:
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemyDatas:
   - {fileID: 11400000, guid: 1cdc085b573d03347af41915a344dd9c, type: 2}
+  - {fileID: 11400000, guid: f9862085c6280aa4581a45654a860f54, type: 2}
   _enemyPrefabs:
   - {fileID: 3965815607295164146, guid: 1866516eb6a5d8e44aa39a3b0e8b49e2, type: 3}
+  - {fileID: 3965815607295164146, guid: 4d5b4667db0d979498a3a44880513529, type: 3}
+  - {fileID: 3965815607295164146, guid: 2a974cfb2f82ef34a98cbc8debe66563, type: 3}
   _enemySpawners:
   - {fileID: 248203996}
 --- !u!4 &25795128

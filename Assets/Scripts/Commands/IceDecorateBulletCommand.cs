@@ -21,6 +21,6 @@ public class IceDecorateBulletCommand : ICommand
 
     private void DecorateBullet()
     {
-        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalBulletTypes.Ice, player.bonusIceDamage + player.baseDamage, Color.blue)); // replace iceDamage with actor.iceDamage(stored in player(?)) so its easier to change values later.
+        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Ice, player.bonusIceDamage + player.baseDamage, Color.blue)); // replace iceDamage with actor.iceDamage(stored in player(?)) so its easier to change values later.
     }
 }

@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 9021498584057762970}
   - component: {fileID: -7876240309597358287}
   m_Layer: 0
-  m_Name: SpiderBullet
+  m_Name: spooderBullet
   m_TagString: EnemyBullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
