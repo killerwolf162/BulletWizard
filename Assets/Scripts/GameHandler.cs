@@ -1,9 +1,19 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 using System.Collections.Generic;
 
 public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
+
+    [Header("DungeonGeneration")]
+    [SerializeField] private Tilemap floorMap;
+    [SerializeField] private Tilemap wallMap;
+    [SerializeField] private SimpleRandomWalkData walkData;
+    [SerializeField] private WallGenerationParameters wallParameters;
+    [SerializeField] private SecretRoomParameters roomParameters;
+    private TilemapVisualizer _tilemapVisualizer;
+    private RoomFirstDungeonGenerator generator;
 
     public Camera cam;
     public GameObject _playerPrefab;
@@ -19,6 +29,10 @@ public class GameHandler : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         instance = this;
+        _tilemapVisualizer = new TilemapVisualizer(floorMap, wallMap);
+        generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, wallParameters, roomParameters);
+        generator.GenerateDungeon();
+
         cam = FindAnyObjectByType<Camera>();
         _player = new PlayerController(Instantiate(_playerPrefab));
         SpawnSpawns();
