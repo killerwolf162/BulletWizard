@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerMove : AState<PlayerController>
     {
-        private float _moveSpeed = 8f;
+        private float _moveSpeed = 3f;
 
         public override void Start(PlayerController runner)
         {

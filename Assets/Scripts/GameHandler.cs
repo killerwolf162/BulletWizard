@@ -19,7 +19,7 @@ public class GameHandler : MonoBehaviour
     public GameObject _playerPrefab;
     public EnemyData[] _enemyDatas;
     public GameObject[] _enemyPrefabs;
-    [SerializeField] private GameObject[] _enemySpawners;
+    private GameObject[] _enemySpawners;
 
     private ISceneObject _player;
 
@@ -35,6 +35,7 @@ public class GameHandler : MonoBehaviour
 
         cam = FindAnyObjectByType<Camera>();
         _player = new PlayerController(Instantiate(_playerPrefab));
+        _enemySpawners = GameObject.FindGameObjectsWithTag("Spawner");
         SpawnSpawns();
     }
 

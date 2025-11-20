@@ -21,8 +21,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     [Header("Checks")]
     const int PLAYER_LAYER = 3;
-    public float chaseRange = 10f;
-    public float attackRange = 4f;
+    public float chaseRange = 4f;
+    public float attackRange = 1f;
     public bool inChaseRange;
     public bool inAttackRange;
 
@@ -34,11 +34,11 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private float _speed;
     private int _damage;
     private int _health;
+    private int _bulletSpeed;
 
     [Header("BulletPool")]
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
     private int _spellCount = 2;
-
 
     //constructor
     public EnemyBehaviour(ElementalTypes type, EnemySpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
@@ -49,6 +49,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         _speed = data.moveSpeed;
         _damage = data.damage;
         _health = data.health;
+        _bulletSpeed = 2;
         _spawner = spawner;
         this.gameobject = gameobject;
         gameobject.transform.position = position;
@@ -197,11 +198,26 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             {
                 if (Bullet.collLookup.TryGetValue(otherCollider, out var bullet))
                 {
-                    TakeDamage(bullet.damage);
-                    bullet.Die();
+                    if (bullet.elementalBulletTypes.Contains(ElementalTypes.Normal))
+                    {
+                        TakeDamage(bullet.damage);
+                        bullet.Die();
+                    }
+                    else if (bullet.elementalBulletTypes.Contains(_elementType))
+                    {
+                        bullet.Die();
+                        Debug.Log("The enemy has the same element, it does no damage!");
+                    }
+                    else if (!bullet.elementalBulletTypes.Contains(_elementType))
+                    {
+                        TakeDamage(bullet.damage*2);
+                        bullet.Die();
+                        Debug.Log("The enemy has a different element, it does 2x damage!");
+                    }
+
+
+
                 }
-                else
-                    Debug.Log("No collision");
             }
         }
     }

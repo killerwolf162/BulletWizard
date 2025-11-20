@@ -26,7 +26,7 @@ public class Bullet : IBullet, ISceneObject
     private float timeOutTime = 2f;
     private int _bulletSpeed;
 
-    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, int bulletSpeed = 10)
+    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, int bulletSpeed = 2)
     {
         bullet = bulletPrefab;
         this.damage = damage;

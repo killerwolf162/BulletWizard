@@ -8,6 +8,7 @@ TagManager:
   - Fireball
   - Bullet
   - EnemyBullet
+  - Spawner
   layers:
   - Default
   - TransparentFX
