@@ -1,0 +1,161 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4660174270548702320
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7516007027361570306}
+  m_Layer: 0
+  m_Name: Dungeon
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7516007027361570306
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4660174270548702320}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7552906151754812150}
+  - {fileID: 3462608289600041392}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4695358408533107769
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7552906151754812150}
+  - component: {fileID: 380012399368636933}
+  m_Layer: 0
+  m_Name: TilemapVisualizer
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7552906151754812150
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4695358408533107769}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7516007027361570306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &380012399368636933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4695358408533107769}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5d42e4b0c4ba0740b5f99f1fcaea429, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  floorTilemap: {fileID: 0}
+  wallTilemap: {fileID: 0}
+  floorTile: {fileID: 11400000, guid: 535582fc1fd2ae04f8c4abdc310c618b, type: 2}
+  wallTop: {fileID: 11400000, guid: 7c062d96900d1594dbf2fe9fca1c3ba7, type: 2}
+  wallSideRight: {fileID: 11400000, guid: 7a7ee816220361941a11db63b39b1ccf, type: 2}
+  wallSideLeft: {fileID: 11400000, guid: b4a95da4b71b9624195760d0a7d5827a, type: 2}
+  wallBottom: {fileID: 11400000, guid: fd0933dbcc902e148a26a02a590c0ce6, type: 2}
+  wallFull: {fileID: 11400000, guid: 5905e96ca6ce9f34383479c751a492ed, type: 2}
+  wallTopVariant: {fileID: 11400000, guid: 814561c556ce90841ac2abf28bfbbec7, type: 2}
+  wallSideRightVariant: {fileID: 11400000, guid: 051cb6ef0fdff444083a9b917ab056a1, type: 2}
+  wallSideLeftVariant: {fileID: 11400000, guid: 92e9897b813c1a34cb1094a56f7f1b30, type: 2}
+  wallBottomVariant: {fileID: 11400000, guid: 7482c23be94b3354081438c0aacb3b60, type: 2}
+  wallTopDamaged: {fileID: 11400000, guid: a75efd2815fc08c419ce3b9efcfc8450, type: 2}
+  wallSideRightDamaged: {fileID: 11400000, guid: 9824776c6c2b13a46bd3634f1909b968, type: 2}
+  wallSideLeftDamaged: {fileID: 11400000, guid: a47e5f1d980cfb549b115189ac280bb4, type: 2}
+  wallBottomDamaged: {fileID: 11400000, guid: 23f2ad86723a2954d882bc2960fa6df1, type: 2}
+  wallInnerCornerUpRight: {fileID: 11400000, guid: 33af58089ae282e4596ee7d35a89b260, type: 2}
+  wallInnerCornerUpLeft: {fileID: 11400000, guid: 6056d48bdf2e198439c370dac6a5f6ce, type: 2}
+  wallInnerCornerDownRight: {fileID: 11400000, guid: 24c7338a8b30fed48a9f206697197dc1, type: 2}
+  wallInnerCornerDownLeft: {fileID: 11400000, guid: 00c6069e261ca694fbcc10ccf6a71395, type: 2}
+  wallDiagonalCornerDownRight: {fileID: 11400000, guid: ca9431b739647dd4e986a3d3deae9381, type: 2}
+  wallDiagonalCornerDownLeft: {fileID: 11400000, guid: 48a400e7938d2274aae2104a93d9152f, type: 2}
+  wallDiagonalCornerUpRight: {fileID: 11400000, guid: ef6e7422bdcde1745a470b97f1f71cfa, type: 2}
+  wallDiagonalCornerUpLeft: {fileID: 11400000, guid: 8efd9c2c0c69e364889cefbd1c2ab824, type: 2}
+--- !u!1 &5672468442749675045
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3462608289600041392}
+  - component: {fileID: 3022905384320734316}
+  m_Layer: 0
+  m_Name: RoomFirstGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3462608289600041392
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5672468442749675045}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7516007027361570306}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3022905384320734316
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5672468442749675045}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 235a1be88dccd7d4e9df8eca8216f588, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tilemapVisualizer: {fileID: 380012399368636933}
+  startPos: {x: 0, y: 0}
+  randomWalkParameters: {fileID: 11400000, guid: 679bd074aa950fc408b43f28df865b07, type: 2}
+  wallGeneratorParameters: {fileID: 11400000, guid: eeb7f0df826f6f64f81db7abce3fa75f, type: 2}
+  secertRoomParameters: {fileID: 11400000, guid: d667981c416f8564c9630d97a21d2b90, type: 2}
+  minRoomWidth: 10
+  minRoomHeight: 10
+  minRoomCount: 15
+  dungeonWidth: 100
+  dungeonHeight: 100
+  randomWalkRooms: 1
+  offset: 2
+  mediumCorridorPercent: 0.45
+  largeCorridorPercent: 0.25
