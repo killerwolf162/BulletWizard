@@ -1,0 +1,26 @@
+﻿using UnityEngine;
+
+public class IceDecorateBulletCommand : ICommand
+{
+
+    private ObjectPool<Bullet> _bulletPool;
+    public PlayerController player;
+    public IAbilityActor actor { get; private set; }
+    public IceDecorateBulletCommand(ObjectPool<Bullet> bulletPool, PlayerController player)
+    {
+        this._bulletPool = bulletPool;
+        this.player = player;
+    }
+
+    
+
+    public void Execute()
+    {
+        DecorateBullet();
+    }
+
+    private void DecorateBullet()
+    {
+        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalBulletTypes.Ice, player.bonusIceDamage + player.baseDamage, Color.blue)); // replace iceDamage with actor.iceDamage(stored in player(?)) so its easier to change values later.
+    }
+}
