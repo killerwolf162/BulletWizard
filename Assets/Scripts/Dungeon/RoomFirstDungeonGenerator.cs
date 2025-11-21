@@ -20,6 +20,14 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     [Range(0.0f, 1f)] [SerializeField] private float mediumCorridorPercent = 0.25f; // ~width 2
     [Range(0.0f, 1f)] [SerializeField] private float largeCorridorPercent = 0.25f;  // ~width 3
 
+    public RoomFirstDungeonGenerator(TilemapVisualizer visualizer, SimpleRandomWalkData walkData, WallGenerationParameters wallParameters, SecretRoomParameters roomParameters)
+    {
+        tilemapVisualizer = visualizer;
+        randomWalkParameters = walkData;
+        wallGeneratorParameters = wallParameters;
+        secertRoomParameters = roomParameters;
+    }
+
     private void Awake()
     {
         //tilemapVisualizer.Clear();
@@ -29,7 +37,6 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     protected override void Run()
     {
         List<BoundsInt> _roomList;
-
         do
         {
             _roomList = ProceduralGenerationAlgorithm.BinarySpacePartitioning(new BoundsInt((Vector3Int)startPos,

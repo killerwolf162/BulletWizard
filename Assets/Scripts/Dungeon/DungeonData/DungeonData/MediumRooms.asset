@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: MediumRooms
   m_EditorClassIdentifier: 
   iterations: 20
-  walkLenght: 15
+  walkLenght: 30
   startRandomEachIt: 0

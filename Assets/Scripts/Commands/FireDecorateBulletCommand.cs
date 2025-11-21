@@ -24,6 +24,6 @@ public class FireDecorateBulletCommand : ICommand
 
     private void DecorateBullet()
     {
-        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Fire, player.bonusFireDamage + player.baseDamage, Color.red, multiplier)); // replace fireDamage with actor.fireDamage(stored in player(?)) so its easier to change values later.
+        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Fire, player.bonusFireDamage + player.baseDamage, Color.red, multiplier));
     }
 }
