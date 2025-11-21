@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
-
     [SerializeField] private int minRoomWidth = 5;
     [SerializeField] private int minRoomHeight = 5;
     [SerializeField] private int minRoomCount = 7;
@@ -19,6 +18,17 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
     [Range(0.0f, 1f)] [SerializeField] private float mediumCorridorPercent = 0.25f; // ~width 2
     [Range(0.0f, 1f)] [SerializeField] private float largeCorridorPercent = 0.25f;  // ~width 3
+
+    public IReadOnlyList<BoundsInt> Rooms => _rooms;
+    public IReadOnlyList<Vector2Int> RoomCenters => _roomCenters;
+    public IReadOnlyList<List<Vector2Int>> RoomFloors => _roomFloors;
+    public HashSet<Vector2Int> AllFloorPositions => _allFloorPositions;
+
+    private List<BoundsInt> _rooms;
+    private List<Vector2Int> _roomCenters;
+    private List<List<Vector2Int>> _roomFloors;
+    private HashSet<Vector2Int> _allFloorPositions;
+
 
     public RoomFirstDungeonGenerator(TilemapVisualizer visualizer, SimpleRandomWalkData walkData, WallGenerationParameters wallParameters, SecretRoomParameters roomParameters)
     {
@@ -48,29 +58,48 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         CreateRooms(_roomList);
     }
 
-    private void CreateRooms(List<BoundsInt> _roomList)
+    private void CreateRooms(List<BoundsInt> roomList)
     {
-        HashSet<Vector2Int> _floor = new();
+        HashSet<Vector2Int> floor;
 
         if(randomWalkRooms)
-            _floor = CreateWalkRooms(_roomList);
+            floor = CreateWalkRooms(roomList);
         else
-            _floor = CreateSimpleRooms(_roomList);
+            floor = CreateSimpleRooms(roomList);
 
-        List<Vector2Int> _roomCenters = new();
-        foreach (var _room in _roomList)
+        _rooms = new List<BoundsInt>(roomList);
+        _roomCenters = new List<Vector2Int>(roomList.Count);
+        _roomFloors = new List<List<Vector2Int>>(roomList.Count);
+
+        foreach (var room in roomList)
         {
-            _roomCenters.Add((Vector2Int)Vector3Int.RoundToInt(_room.center));
+            var center = (Vector2Int)Vector3Int.RoundToInt(room.center);
+            _roomCenters.Add(center);
+
+            var thisRoomFloors = new List<Vector2Int>();
+
+            for(int x = room.xMin + offset; x < room.xMax - offset; x++)
+            {
+                for (int y = room.yMin + offset; y < room.yMax - offset; y++)
+                {
+                    var pos = new Vector2Int(x, y);
+                    if (floor.Contains(pos))
+                        thisRoomFloors.Add(pos);
+                }
+            }
+            _roomFloors.Add(thisRoomFloors);
         }
 
-        List<List<Vector2Int>> _corridorPaths;
-        HashSet<Vector2Int> _corridors = ConnectRooms(_roomCenters, out _corridorPaths);
+        List<List<Vector2Int>> corridorPaths;
+        HashSet<Vector2Int> corridors = ConnectRooms(_roomCenters.ToList(), out corridorPaths);
 
-        _floor.UnionWith(_corridors);
-        IncreaseCorridors(_corridorPaths, _floor, mediumCorridorPercent, largeCorridorPercent);
+        floor.UnionWith(corridors);
+        IncreaseCorridors(corridorPaths, floor, mediumCorridorPercent, largeCorridorPercent);
 
-        tilemapVisualizer.PaintFloorTiles(_floor);
-        WallGenerator.CreateWalls(_floor, tilemapVisualizer, wallGeneratorParameters, secertRoomParameters);
+        _allFloorPositions = floor;
+
+        tilemapVisualizer.PaintFloorTiles(floor);
+        WallGenerator.CreateWalls(floor, tilemapVisualizer, wallGeneratorParameters, secertRoomParameters);
     }
 
     private HashSet<Vector2Int> CreateWalkRooms(List<BoundsInt> _roomList)

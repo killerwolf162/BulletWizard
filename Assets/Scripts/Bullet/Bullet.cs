@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class Bullet : IBullet, ISceneObject
 {
+    private const int WALL_LAYER_MASK = 1 << 7;
+
     public static readonly Dictionary<Collider2D, Bullet> collLookup = new Dictionary<Collider2D, Bullet>();
 
     public HashSet<ElementalTypes> elementalBulletTypes { get; set; } = new HashSet<ElementalTypes>() { ElementalTypes.Normal };
@@ -54,6 +56,9 @@ public class Bullet : IBullet, ISceneObject
         {
             Die();
         }
+
+        if (_col != null)
+            CheckWallHit();
     }
 
     public void Die()
@@ -69,7 +74,7 @@ public class Bullet : IBullet, ISceneObject
     public void OnEnableObject()
     {
         bullet.SetActive(true);
-        collLookup.Add(_col, this);
+        collLookup[_col] = this;
         GameHandler.instance.Subscribe(this);
 
         bullet.transform.position = _shooter.GameObject().transform.position;
@@ -87,7 +92,15 @@ public class Bullet : IBullet, ISceneObject
             collLookup.Remove(_col);
 
         bullet.SetActive(false);
-     
+
         timer = 0;
+    }
+
+    private void CheckWallHit()
+    {
+        if (_col.IsTouchingLayers(WALL_LAYER_MASK))
+        {
+            Die();
+        }
     }
 }

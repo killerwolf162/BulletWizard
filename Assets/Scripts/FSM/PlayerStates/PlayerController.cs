@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShooter
 {
+    internal const int WALL_LAYER_MASK = 1 << 7;
+
     [Header("StateMachine")]
     public StateMachine<PlayerController> stateMachine;
     public ScratchPad sharedData => new ScratchPad();
@@ -21,6 +23,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     private Camera _cam;
     private Vector3 _mousePos;
+    private Vector3 _lastSafePosition;
 
     private float _damageTimeOut;
 
@@ -85,13 +88,17 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
         _damageTimeOut -= Time.deltaTime;
 
+        Vector3 previousPos = gameobject.transform.position;
+
         //update loop statemachine
         stateMachine?.Update();
 
-        if (col != null)
+
+        if(col != null)
         {
-            OnCollisionEnter2D(col);
+            HandleEnemyBulletHits();
         }
+        
         SetCameraPosition();
     }
 
@@ -154,16 +161,17 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         GameHandler.instance.cam.transform.position = gameobject.transform.position + new Vector3(0, 0, -10);
     }
 
-    private void OnCollisionEnter2D(Collider2D collider)
+    private void HandleEnemyBulletHits()
     {
-        List<Collider2D> overlappingColliders = new List<Collider2D>();
-        ContactFilter2D enemyFilter = new ContactFilter2D();
-
-        collider.Overlap(enemyFilter, overlappingColliders);
-
+        var overlappingColliders = new List<Collider2D>();
+        var filter = new ContactFilter2D
+        {
+            useTriggers = true
+        };
+        col.Overlap(filter, overlappingColliders);
         foreach (var otherCollider in overlappingColliders)
         {
-            if (otherCollider.tag == "EnemyBullet")
+            if (otherCollider.CompareTag("EnemyBullet"))
             {
                 if (Bullet.collLookup.TryGetValue(otherCollider, out var bullet))
                 {

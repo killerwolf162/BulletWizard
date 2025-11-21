@@ -7,7 +7,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     [Header("General")]
     private Rigidbody2D rb;
     private Collider2D col;
-    private EnemySpawner _spawner;
+    private AbstractSpawner _spawner;
     public GameObject gameobject { get; private set; }
     private ElementalTypes _elementType;
 
@@ -21,6 +21,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     [Header("Checks")]
     const int PLAYER_LAYER = 3;
+    internal const int WALL_LAYER_MASK = 1 << 7;
     public float chaseRange = 4f;
     public float attackRange = 1f;
     public bool inChaseRange;
@@ -30,6 +31,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     public Transform _player;
 
     [Header("Stats")]
+    public float Speed => _speed;
     private string _name;
     private float _speed;
     private int _damage;
@@ -40,8 +42,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
     private int _spellCount = 2;
 
-    //constructor
-    public EnemyBehaviour(ElementalTypes type, EnemySpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
+    public IReadOnlyList<Vector3> PatrolPoints => _spawner?.PatrolPoints;
+    public EnemyBehaviour(ElementalTypes type, AbstractSpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
     {
         _player = Player;
         _elementType = type;
@@ -101,13 +103,17 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             GameHandler.instance.UnSubscribe(this);
         }
 
+        Vector3 previousPos = gameobject.transform.position;
+
         //update loop statemachine
         stateMachine?.Update();
         CheckPlayerInRange();
-        if (col != null)
+
+        if(col != null)
         {
-            OnCollisionEnter2D(col);
+            HandleProjectileHits();
         }
+        
     }
 
     //check if the enemy gives chase or attacks
@@ -168,7 +174,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     private void Die()
     {
-        _spawner.ownedEnemies.Remove(this);
+        _spawner?.UnregisterEnemy(this);
         GameHandler.instance.UnSubscribe(this);
 
         _bulletPool?.DestroyAll(b =>
@@ -179,22 +185,25 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         GameHandler.instance.DestroyObject(gameobject);
     }
 
-    private void OnCollisionEnter2D(Collider2D collider)
+    private void HandleProjectileHits()
     {
-        List<Collider2D> overlappingColliders = new List<Collider2D>();
-        ContactFilter2D enemyFilter = new ContactFilter2D();
-
-        collider.Overlap(enemyFilter, overlappingColliders);
+        var overlappingColliders = new List<Collider2D>();
+        var filter = new ContactFilter2D
+        {
+            useTriggers = true
+        };
+        col.Overlap(filter, overlappingColliders);
 
         foreach (Collider2D otherCollider in overlappingColliders)
         {
-
-            if (otherCollider.tag == "Fireball")
+            if (otherCollider.CompareTag("Fireball"))
             {
                 GameHandler.instance.UnSubscribe(this);
                 GameHandler.instance.DestroyObject(gameobject);
+                return;
             }
-            if (otherCollider.tag == "Bullet")
+
+            if (otherCollider.CompareTag("Bullet"))
             {
                 if (Bullet.collLookup.TryGetValue(otherCollider, out var bullet))
                 {
@@ -208,15 +217,12 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
                         bullet.Die();
                         Debug.Log("The enemy has the same element, it does no damage!");
                     }
-                    else if (!bullet.elementalBulletTypes.Contains(_elementType))
+                    else // different element
                     {
-                        TakeDamage(bullet.damage*2);
+                        TakeDamage(bullet.damage * 2);
                         bullet.Die();
                         Debug.Log("The enemy has a different element, it does 2x damage!");
                     }
-
-
-
                 }
             }
         }

@@ -1,28 +1,30 @@
 using UnityEngine;
 
- public class EnemyPatrol : AState<EnemyBehaviour>
+public class EnemyPatrol : AState<EnemyBehaviour>
+{
+    private Vector3 _walkPoint;
+    private bool _walkPointSet;
+
+    public override void Start(EnemyBehaviour runner)
     {
-        private Vector3 _walkPoint;
-        private float _walkPointRange = 10f;
-        private bool _walkPointSet;
-        private float _speed = 2;
+        Debug.Log("Enter Patrol");
+        _walkPointSet = false;
+        base.Start(runner);
+    }
 
-        public override void Start(EnemyBehaviour runner)
+    public override void Update(EnemyBehaviour runner)
+    {
+        base.Update(runner);
+
+        if (!_walkPointSet) 
+            GetNewWalkPoint(runner);
+
+        if (_walkPointSet)
         {
-            Debug.Log("Enter Patrol");
-            base.Start(runner);
-        }
+            var currentPos = runner.gameobject.transform.position;
+            float speed = runner.Speed;
 
-        public override void Update(EnemyBehaviour runner)
-        {
-            base.Update(runner);
-
-            if (!_walkPointSet) GetNewWalkPoint(runner);
-
-            if (_walkPointSet) 
-            {
-                runner.gameobject.transform.position = Vector3.MoveTowards(runner.gameobject.transform.position, _walkPoint, _speed * Time.deltaTime);
-            }
+            runner.gameobject.transform.position = Vector3.MoveTowards(currentPos, _walkPoint, speed * Time.deltaTime);
 
             Vector3 disToWalkPoint = runner.gameobject.transform.position - _walkPoint;
 
@@ -30,23 +32,25 @@ using UnityEngine;
             {
                 onSwitch(runner.idleState);
             }
+        }    
+    }
 
-        }
+    public override void Complete(EnemyBehaviour runner)
+    {
+        _walkPointSet = false;
+        base.Complete(runner);
+    }
 
-        public override void Complete(EnemyBehaviour runner)
+    private void GetNewWalkPoint(EnemyBehaviour runner)
+    {
+        var patrolPoints = runner.PatrolPoints;
+
+        if(patrolPoints != null && patrolPoints.Count > 0)
         {
-            _walkPointSet = false;
-            base.Complete(runner);
-        }
-
-        private void GetNewWalkPoint(EnemyBehaviour runner)
-        {
-            float randomY = Random.Range(-_walkPointRange, _walkPointRange);
-            float randomX = Random.Range(-_walkPointRange, _walkPointRange);
-
-            Vector3 pos = runner.gameobject.transform.position;
-            _walkPoint = new Vector3(pos.x + randomX, pos.y + randomY, 0);
+            int idx = Random.Range(0, patrolPoints.Count);
+            _walkPoint = patrolPoints[idx];
             _walkPointSet = true;
         }
-
     }
+
+}

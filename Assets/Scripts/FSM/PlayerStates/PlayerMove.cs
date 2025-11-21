@@ -1,28 +1,43 @@
 using UnityEngine;
 
 public class PlayerMove : AState<PlayerController>
+{
+    private float _moveSpeed = 3f;
+
+    public override void Start(PlayerController runner)
     {
-        private float _moveSpeed = 3f;
+        base.Start(runner);
+    }
 
-        public override void Start(PlayerController runner)
+    public override void Update(PlayerController runner)
+    {
+        Vector2 input = runner.MoveDirection();
+        if (input.sqrMagnitude < 0.01f)
         {
-            base.Start(runner);
+            onSwitch(runner.idleState);
+            return;
         }
 
-        public override void Update(PlayerController runner)
+        Vector2 moveDir = input.normalized;
+        float distance = _moveSpeed * Time.deltaTime;
+
+        var filter = new ContactFilter2D
         {
-            Vector3 dir = new Vector3(runner.MoveDirection().x, runner.MoveDirection().y ,0);
+            useTriggers = false
+        };
+        filter.SetLayerMask(PlayerController.WALL_LAYER_MASK);
+        RaycastHit2D[] hits = new RaycastHit2D[1];
+        int hitCount = runner.col.Cast(moveDir, filter, hits, distance);
 
-            runner.rb.MovePosition(runner.gameobject.transform.position + dir * _moveSpeed * Time.deltaTime);
-
-            if (runner.MoveDirection().magnitude < 0.1)
-            {
-                onSwitch(runner.idleState);
-            }
-        }
-
-        public override void Complete(PlayerController runner)
+        if(hitCount == 0)
         {
-            base.Complete(runner);
+            Vector2 newPos = runner.rb.position + moveDir * distance;
+            runner.rb.MovePosition(newPos);
         }
     }
+
+    public override void Complete(PlayerController runner)
+    {
+        base.Complete(runner);
+    }
+}

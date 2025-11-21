@@ -6,23 +6,32 @@ public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
 
-    [Header("DungeonGeneration")]
+    [Header("Tilemaps")]
     [SerializeField] private Tilemap floorMap;
     [SerializeField] private Tilemap wallMap;
+
+    [Header("DungeonGeneration")]
     [SerializeField] private SimpleRandomWalkData walkData;
     [SerializeField] private WallGenerationParameters wallParameters;
     [SerializeField] private SecretRoomParameters roomParameters;
+
     private TilemapVisualizer _tilemapVisualizer;
-    private RoomFirstDungeonGenerator generator;
+    private RoomFirstDungeonGenerator _generator;
 
-    public Camera cam;
-    public GameObject _playerPrefab;
-    public EnemyData[] _enemyDatas;
-    public GameObject[] _enemyPrefabs;
+    [Header("Spawning")]
+    [SerializeField] private GameObject _playerPrefab;
+    [SerializeField] private GameObject _enemySpawnerPrefab;
+    [SerializeField] private int _maxSpawners;
     private GameObject[] _enemySpawners;
+    private List<Vector3>[] _spawnerPatrolPoints;
 
+    [Header("EnemyGos & Data")]
+    [SerializeField] private EnemyData _spooderData;
+    [SerializeField] private GameObject[] _spooderGos;
+
+    public Camera cam;   
+    
     private ISceneObject _player;
-
     private List<IUpdateable> _updateables = new List<IUpdateable>();
 
     private void Start()
@@ -30,13 +39,12 @@ public class GameHandler : MonoBehaviour
         Application.targetFrameRate = 60;
         instance = this;
         _tilemapVisualizer = new TilemapVisualizer(floorMap, wallMap);
-        generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, wallParameters, roomParameters);
-        generator.GenerateDungeon();
+        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, wallParameters, roomParameters);
+        _generator.GenerateDungeon();
 
         cam = FindAnyObjectByType<Camera>();
-        _player = new PlayerController(Instantiate(_playerPrefab));
-        _enemySpawners = GameObject.FindGameObjectsWithTag("Spawner");
-        SpawnSpawns();
+
+        SpawnPlayerAndSpawners();
     }
 
     private void Update()
@@ -60,6 +68,124 @@ public class GameHandler : MonoBehaviour
         }
     }
 
+    private void SpawnPlayerAndSpawners()
+    {
+        var roomCenters = _generator.RoomCenters;
+        var roomFloors = _generator.RoomFloors;
+
+        if (roomCenters == null || roomCenters.Count == 0)
+        {
+            Debug.Log("Dungeon has no rooms");
+            return;
+        }
+
+        // Spawn player in middle room //
+
+        Vector2 avg = Vector2.zero;
+        foreach (var c in roomCenters)
+            avg += c;
+        avg /= roomCenters.Count;
+
+        int playerRoomIdx = 0;
+        float bestDist = float.MaxValue;
+        for(int i = 0; i< roomCenters.Count; i++)
+        {
+            float d = (roomCenters[i] - avg).sqrMagnitude;
+            if(d < bestDist)
+            {
+                bestDist = d;
+                playerRoomIdx = i;
+            }
+        }
+        Vector2Int playerCell = GetAnyFloorInRoom(roomFloors[playerRoomIdx], roomCenters[playerRoomIdx]);
+        Vector3 playerWorld = FloorPosToWorld(playerCell);
+
+        GameObject playerGo = Instantiate(_playerPrefab, playerWorld, Quaternion.identity);
+        _player = new PlayerController(playerGo);
+
+        // Spawn spawners //
+
+        List<int> roomIdcs = new List<int>();
+        for(int i = 0; i< roomCenters.Count; i++)
+        {
+            if (i == playerRoomIdx)
+                continue;
+            roomIdcs.Add(i);
+        }
+
+        //shuffle spawner rooms
+        for(int i = roomIdcs.Count - 1; i> 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            int temp = roomIdcs[i];
+            roomIdcs[i] = roomIdcs[j];
+            roomIdcs[j] = temp;
+        }
+
+        int spawnerCount = Mathf.Min(_maxSpawners, roomIdcs.Count);
+        _enemySpawners = new GameObject[spawnerCount];
+        _spawnerPatrolPoints = new List<Vector3>[spawnerCount];
+
+        // prep spawnerGOs
+        for (int s = 0; s < spawnerCount; s++)
+        {
+            int roomIdx = roomIdcs[s];
+            var roomFloorCells = roomFloors[roomIdx];
+
+            List<Vector3> patrolPoints = new List<Vector3>();
+            if (roomFloorCells != null)
+            {
+                for (int i = 0; i < roomFloorCells.Count; i++)
+                {
+                    patrolPoints.Add(FloorPosToWorld(roomFloorCells[i]));
+                }
+            }
+
+            Vector2Int spawnerCell = GetAnyFloorInRoom(roomFloors[roomIdx], roomCenters[roomIdx]);
+            Vector3 spawnerWorld = FloorPosToWorld(spawnerCell);
+
+            GameObject spawnerGO = Instantiate(_enemySpawnerPrefab, spawnerWorld, Quaternion.identity);
+            _enemySpawners[s] = spawnerGO;
+            _spawnerPatrolPoints[s] = patrolPoints;
+        }
+        SpawnSpooderSpawner();
+    }
+
+    // Picks a random floor tile from the room, or falls back to the room center if empty.
+    private Vector2Int GetAnyFloorInRoom(IList<Vector2Int> roomFloor, Vector2Int fallback)
+    {
+        if (roomFloor != null && roomFloor.Count > 0)
+        {
+            int idx = Random.Range(0, roomFloor.Count);
+            return roomFloor[idx];
+        }
+        return fallback;
+    }
+
+    // Converts dungeon grid coords (Vector2Int) to a world position.
+    private Vector3 FloorPosToWorld(Vector2Int pos)
+    {
+        // If the player appears off-center, add +0.5f offsets:
+        return new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0f);
+    }
+
+    public void SpawnSpooderSpawner()
+    {
+        for (int i = 0; i < _enemySpawners.Length; i++)
+        {
+            GameObject spawner = _enemySpawners[i];
+            List<Vector3> patrolPoints = _spawnerPatrolPoints[i];
+
+            var spawnerGO = new SpooderSpawner(
+                spawner,
+                _spooderGos,
+                spawner.transform,
+                _player.gameobject.transform,
+                _spooderData,
+                patrolPoints);
+        }
+    }
+
     public GameObject InstantiateNew(GameObject gameObject)
     {
         return Instantiate(gameObject);
@@ -73,13 +199,5 @@ public class GameHandler : MonoBehaviour
     public void TimedDestroyObject(GameObject objectToDestroy, float time)
     {
         Destroy(objectToDestroy, time);
-    }
-
-    public void SpawnSpawns()
-    {
-        foreach (GameObject spawner in _enemySpawners)
-        {
-            var spawnerGO = new EnemySpawner(spawner, spawner.transform, _player.gameobject.transform);
-        }
     }
 }
