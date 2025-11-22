@@ -9,6 +9,9 @@ public class GameHandler : MonoBehaviour
     [Header("Tilemaps")]
     [SerializeField] private Tilemap floorMap;
     [SerializeField] private Tilemap wallMap;
+    public Tilemap FloorMap => floorMap;
+    public Tilemap WallMap => wallMap;
+    public AStarPathfinder Pathfinder { get; private set; }
 
     [Header("DungeonGeneration")]
     [SerializeField] private SimpleRandomWalkData walkData;
@@ -41,6 +44,8 @@ public class GameHandler : MonoBehaviour
         _tilemapVisualizer = new TilemapVisualizer(floorMap, wallMap);
         _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, wallParameters, roomParameters);
         _generator.GenerateDungeon();
+
+        Pathfinder = new AStarPathfinder(floorMap, wallMap);
 
         cam = FindAnyObjectByType<Camera>();
 

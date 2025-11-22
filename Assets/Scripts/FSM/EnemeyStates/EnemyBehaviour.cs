@@ -22,7 +22,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     [Header("Checks")]
     const int PLAYER_LAYER = 3;
     internal const int WALL_LAYER_MASK = 1 << 7;
-    public float chaseRange = 4f;
+    public float chaseRange = 5f;
+    public float soundRange = 3f;   
     public float attackRange = 1f;
     public bool inChaseRange;
     public bool inAttackRange;
@@ -105,9 +106,10 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
         Vector3 previousPos = gameobject.transform.position;
 
-        //update loop statemachine
-        stateMachine?.Update();
+        //update loop statemachine.
         CheckPlayerInRange();
+        stateMachine?.Update();
+        
 
         if(col != null)
         {
@@ -119,10 +121,44 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     //check if the enemy gives chase or attacks
     public void CheckPlayerInRange()
     {
-        if (Vector3.Distance(gameobject.transform.position, _player.transform.position) < attackRange)
+        if (gameobject == null || _player == null)
+            return;
+
+        float distance = Vector3.Distance(gameobject.transform.position, _player.transform.position);
+        inAttackRange = distance <= attackRange;
+
+
+        bool canSee = distance <= chaseRange && HasLineOfSightToPlayer();
+        bool canHear = distance <= soundRange;
+
+        bool shouldChase = !inAttackRange && (canSee || canHear);
+        inChaseRange = shouldChase;
+
+        if (inAttackRange)
+        {
             stateMachine.SetState(attackState);
-        else if (Vector3.Distance(gameobject.transform.position, _player.transform.position) < chaseRange)
+        }
+        else if (shouldChase)
+        {
             stateMachine.SetState(chaseState);
+        }
+    }
+
+    private bool HasLineOfSightToPlayer()
+    {
+        Vector3 origin = gameobject.transform.position;
+        Vector3 target = _player.position;
+        Vector3 dir = target - origin;
+        float distance = dir.magnitude;
+
+        if (distance <= 0.01f)
+            return true;
+
+        dir /= distance;
+
+        // If the ray hits a wall, there is no line of sight.
+        RaycastHit2D hit = Physics2D.Raycast(origin, dir, distance, WALL_LAYER_MASK);
+        return hit.collider == null;
     }
 
     private void TakeDamage(int amount)
