@@ -26,6 +26,12 @@ public class EnemyPatrol : AState<EnemyBehaviour>
 
         base.Update(runner);
 
+        if(runner.inChaseRange)
+        {
+            onSwitch(runner.chaseState);
+            return;
+        }
+
         if (!_walkPointSet)
         {
             GetNewWalkPoint(runner);

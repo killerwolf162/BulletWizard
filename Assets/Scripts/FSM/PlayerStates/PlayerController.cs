@@ -6,6 +6,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 {
     internal const int WALL_LAYER_MASK = 1 << 7;
 
+    //public event Action<int, int> OnHealthChanged;
+
     [Header("StateMachine")]
     public StateMachine<PlayerController> stateMachine;
     public ScratchPad sharedData => new ScratchPad();
@@ -16,6 +18,25 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public Rigidbody2D rb;
     public Collider2D col;
+
+    public int Health => _health;
+    public int MaxHealth => _maxHealth;
+
+    public int bonusFireDamage = 1;
+    public int bonusIceDamage = 1;
+    public int baseDamage = 1;
+
+    public FireballAbility FireballAbility { get; private set; }
+    public ShootBulletAbility ShootBulletAbility { get; private set; }
+
+    public Color NextBulletColor
+    {
+        get
+        {
+            var next = _bulletPool.RequestObject();
+            return next != null ? next.color : Color.black;
+        }
+    }
 
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
 
@@ -28,12 +49,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private float _damageTimeOut;
 
     private int _spellCount = 15;
-    private int _health = 10;
-
-    public int bonusFireDamage = 1;
-    public int bonusIceDamage = 1;
-    public int baseDamage = 1;
-
+    private int _health;
+    private int _maxHealth = 10;
 
     public PlayerController(GameObject gameobject)
     {
@@ -73,13 +90,16 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
             bullet.Start();
         }
 
+        _health = _maxHealth;
+
         //initialize input bindings
         //_inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new DashAbility(this));
-        _inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new FireballAbility(this));
+        _inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, FireballAbility = new FireballAbility(this));
+        _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, ShootBulletAbility = new ShootBulletAbility(_bulletPool));
         _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new FireDecorateBulletCommand(_bulletPool, this));
         _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new IceDecorateBulletCommand(_bulletPool, this));
         _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new UnDecorateBulletCommand(_bulletPool, this));
-        _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, new ShootBulletCommand(_bulletPool));
+        
     }
 
     public virtual void Update()
@@ -105,6 +125,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private void TakeDamage(int amount)
     {
         _health -= amount;
+        //OnHealthChanged?.Invoke(_health, _maxHealth);
         Debug.Log($" damage taken: {amount}, current health: {_health}");
         if (_health <= 0)
             Die();

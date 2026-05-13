@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.Tilemaps;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using System;
+using TMPro;
 
 public class GameHandler : MonoBehaviour
 {
@@ -32,10 +35,25 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private EnemyData _spooderData;
     [SerializeField] private GameObject[] _spooderGos;
 
+    [Header("UI")]
+    [SerializeField] private Slider _healthSlider;
+    [SerializeField] private TMP_Text _scoreText;
+    [SerializeField] private Image _bulletCooldownOverlay;
+    [SerializeField] private Image _fireBallCooldownOverlay;
+
     public Camera cam;   
     
     private ISceneObject _player;
     private List<IUpdateable> _updateables = new List<IUpdateable>();
+    private PlayerHUD _hud;
+    public int Score => _score;
+    private int _score;
+
+    void Awake()
+    {
+        Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0; // disable vsync so targetFrameRate takes effect
+    }
 
     private void Start()
     {
@@ -57,6 +75,8 @@ public class GameHandler : MonoBehaviour
         for (int i = 0; i < _updateables.Count; i++)
             _updateables[i].Update();
 
+        if (Input.GetKeyDown(KeyCode.Escape))
+            Application.Quit();
     }
 
     public void Subscribe(IUpdateable updateable)
@@ -121,7 +141,7 @@ public class GameHandler : MonoBehaviour
         //shuffle spawner rooms
         for(int i = roomIdcs.Count - 1; i> 0; i--)
         {
-            int j = Random.Range(0, i + 1);
+            int j = UnityEngine.Random.Range(0, i + 1);
             int temp = roomIdcs[i];
             roomIdcs[i] = roomIdcs[j];
             roomIdcs[j] = temp;
@@ -154,6 +174,9 @@ public class GameHandler : MonoBehaviour
             _spawnerPatrolPoints[s] = patrolPoints;
         }
         SpawnSpooderSpawner();
+
+        var playerController = (PlayerController)_player;
+        _hud = new PlayerHUD(_healthSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, playerController, playerController.FireballAbility, playerController.ShootBulletAbility);
     }
 
     // Picks a random floor tile from the room, or falls back to the room center if empty.
@@ -161,7 +184,7 @@ public class GameHandler : MonoBehaviour
     {
         if (roomFloor != null && roomFloor.Count > 0)
         {
-            int idx = Random.Range(0, roomFloor.Count);
+            int idx = UnityEngine.Random.Range(0, roomFloor.Count);
             return roomFloor[idx];
         }
         return fallback;
@@ -189,6 +212,11 @@ public class GameHandler : MonoBehaviour
                 _spooderData,
                 patrolPoints);
         }
+    }
+
+    public void IncreaseScore(int scoreToAdd)
+    {
+        _score += scoreToAdd;
     }
 
     public GameObject InstantiateNew(GameObject gameObject)

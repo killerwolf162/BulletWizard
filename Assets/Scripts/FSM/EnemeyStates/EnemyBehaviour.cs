@@ -22,9 +22,11 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     [Header("Checks")]
     const int PLAYER_LAYER = 3;
     internal const int WALL_LAYER_MASK = 1 << 7;
-    public float chaseRange = 5f;
-    public float soundRange = 3f;   
-    public float attackRange = 1f;
+    public float chaseRange = 8f;
+    public float soundRange = 6f;
+    public float attackRange = 6f;
+    public float chaseThreshold = 2f;
+    public bool hasReachedThreshold;
     public bool inChaseRange;
     public bool inAttackRange;
 
@@ -37,11 +39,11 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private float _speed;
     private int _damage;
     private int _health;
-    private int _bulletSpeed;
+    private int _score;
 
     [Header("BulletPool")]
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
-    private int _spellCount = 2;
+    private int _spellCount = 5;
 
     public IReadOnlyList<Vector3> PatrolPoints => _spawner?.PatrolPoints;
     public EnemyBehaviour(ElementalTypes type, AbstractSpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
@@ -52,7 +54,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         _speed = data.moveSpeed;
         _damage = data.damage;
         _health = data.health;
-        _bulletSpeed = 2;
+        _score = data.score;
         _spawner = spawner;
         this.gameobject = gameobject;
         gameobject.transform.position = position;
@@ -109,13 +111,13 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         //update loop statemachine.
         CheckPlayerInRange();
         stateMachine?.Update();
-        
 
-        if(col != null)
+
+        if (col != null)
         {
             HandleProjectileHits();
         }
-        
+
     }
 
     //check if the enemy gives chase or attacks
@@ -125,23 +127,13 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             return;
 
         float distance = Vector3.Distance(gameobject.transform.position, _player.transform.position);
-        inAttackRange = distance <= attackRange;
-
-
         bool canSee = distance <= chaseRange && HasLineOfSightToPlayer();
         bool canHear = distance <= soundRange;
 
-        bool shouldChase = !inAttackRange && (canSee || canHear);
+        bool shouldChase = canSee || canHear;
         inChaseRange = shouldChase;
-
-        if (inAttackRange)
-        {
-            stateMachine.SetState(attackState);
-        }
-        else if (shouldChase)
-        {
-            stateMachine.SetState(chaseState);
-        }
+        inAttackRange = distance <= attackRange && canSee;
+        hasReachedThreshold = distance <= chaseThreshold;
     }
 
     private bool HasLineOfSightToPlayer()
@@ -219,6 +211,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         });
         _bulletPool = null;
         GameHandler.instance.DestroyObject(gameobject);
+
+        GameHandler.instance.IncreaseScore(_score);
     }
 
     private void HandleProjectileHits()
@@ -234,8 +228,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         {
             if (otherCollider.CompareTag("Fireball"))
             {
-                GameHandler.instance.UnSubscribe(this);
-                GameHandler.instance.DestroyObject(gameobject);
+                Die();
                 return;
             }
 

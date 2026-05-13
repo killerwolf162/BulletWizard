@@ -6,7 +6,6 @@ public class EnemyIdle : AState<EnemyBehaviour>
 
     public override void Start(EnemyBehaviour runner)
     {
-        Debug.Log("Enter IdleState");
         base.Start(runner);
         _currentTime = _timer;
     }
@@ -18,9 +17,16 @@ public class EnemyIdle : AState<EnemyBehaviour>
         //# Timer to Switch to patrol*
         _currentTime -= Time.deltaTime;
 
+        if (runner.inChaseRange)
+        {
+            onSwitch(runner.chaseState);
+            return;
+        }
+
         if (_currentTime <= 0f)
         {
             onSwitch(runner.patrolState);
+            return;
         }
     }
 

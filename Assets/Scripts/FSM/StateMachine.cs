@@ -2,6 +2,7 @@ public class StateMachine<T> where T : IStateRunner
 {
     private T owner;
     private IState<T> currentState;
+    public IState<T> CurrentState => currentState;
 
     public StateMachine(T _owner)
     {

@@ -30,4 +30,8 @@ public abstract class AbilityBase : IUpdateable
     {
         return activeCooldown <= 0;
     }
+
+    public float CooldownProgress => cooldownTime > 0
+    ? Mathf.Clamp01(activeCooldown / cooldownTime)
+    : 0f;
 }

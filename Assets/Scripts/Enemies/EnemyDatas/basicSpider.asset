@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: basicSpider
   m_EditorClassIdentifier: 
   enemyName: basicSpooder
-  moveSpeed: 1
+  moveSpeed: 3
   damage: 1
   health: 3
+  score: 10

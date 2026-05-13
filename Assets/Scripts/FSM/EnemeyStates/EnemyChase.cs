@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class EnemyChase : AState<EnemyBehaviour>
 {
-    private float _chaseSpeed = 2;
-
     private List<Vector3> _currentPath;
     private int _currentWaypointIndex;
 
@@ -15,7 +13,6 @@ public class EnemyChase : AState<EnemyBehaviour>
 
     public override void Start(EnemyBehaviour runner)
     {
-        Debug.Log("Enter Chase");
         base.Start(runner);
 
         _currentPath = null;
@@ -38,6 +35,12 @@ public class EnemyChase : AState<EnemyBehaviour>
             return;
         }
 
+        if(runner.hasReachedThreshold)
+        {
+            onSwitch(runner.attackState);
+            return;
+        }
+
         var floorMap = GameHandler.instance.FloorMap;
         _repathTimer += Time.deltaTime;
 
@@ -54,7 +57,7 @@ public class EnemyChase : AState<EnemyBehaviour>
         Vector3 targetPos = _currentPath[_currentWaypointIndex];
         Vector3 currentPos = runner.gameobject.transform.position;
 
-        runner.gameobject.transform.position = Vector3.MoveTowards(currentPos, targetPos, _chaseSpeed * Time.deltaTime);
+        runner.gameobject.transform.position = Vector3.MoveTowards(currentPos, targetPos, runner.Speed * Time.deltaTime);
 
         if (Vector3.Distance(runner.gameobject.transform.position, targetPos) < 0.1f)
         {
@@ -63,10 +66,9 @@ public class EnemyChase : AState<EnemyBehaviour>
 
         if (_currentPath == null || _currentPath.Count == 0)
         {
-            runner.gameobject.transform.position = Vector3.MoveTowards(runner.gameobject.transform.position, runner._player.position, _chaseSpeed * Time.deltaTime);
+            runner.gameobject.transform.position = Vector3.MoveTowards(runner.gameobject.transform.position, runner._player.position, runner.Speed * Time.deltaTime);
             return;
         }
-
     }
 
     public override void Complete(EnemyBehaviour runner)

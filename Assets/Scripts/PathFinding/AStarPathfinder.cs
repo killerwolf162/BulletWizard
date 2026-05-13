@@ -26,7 +26,6 @@ public class AStarPathfinder
 
     public List<Vector3> FindPath(Vector3 startWorld, Vector3 targetWorld)
     {
-        Debug.Log("Astar ran");
 
         if (_floorMap == null)
             return null;

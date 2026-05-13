@@ -25,10 +25,10 @@ public class Bullet : IBullet, ISceneObject
     private Collider2D _col;
 
     private float timer = 0f;
-    private float timeOutTime = 2f;
-    private int _bulletSpeed;
+    private float timeOutTime = 4f;
+    private float _bulletSpeed;
 
-    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, int bulletSpeed = 2)
+    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, float bulletSpeed = 5f)
     {
         bullet = bulletPrefab;
         this.damage = damage;
@@ -81,7 +81,7 @@ public class Bullet : IBullet, ISceneObject
         bullet.transform.rotation = _shooter.GetBulletRotation();
 
         _rend.color = color;
-        _rig.AddForce(_shooter.GetAimDirection().normalized * _bulletSpeed, ForceMode2D.Impulse);
+        _rig.AddForce((_shooter.GetAimDirection().normalized * _bulletSpeed), ForceMode2D.Impulse);
     }
 
     public void OnDisableObject()

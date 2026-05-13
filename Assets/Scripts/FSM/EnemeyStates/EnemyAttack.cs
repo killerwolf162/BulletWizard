@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class EnemyAttack : AState<EnemyBehaviour>
 {
-    private float _attackTimer = 3f;
+    private float _attackTimer = 2f;
     private float _currentTime;
 
     public override void Start(EnemyBehaviour runner)
@@ -26,7 +26,10 @@ public class EnemyAttack : AState<EnemyBehaviour>
         }
 
         if (!runner.inAttackRange)
-            onSwitch?.Invoke(runner.idleState);
+        {
+            onSwitch(runner.chaseState);
+            return;
+        }
     }
 
     public override void Complete(EnemyBehaviour runner)
