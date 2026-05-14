@@ -156,7 +156,14 @@ MonoBehaviour:
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
   _maxSpawners: 10
-  _spooderData: {fileID: 11400000, guid: 1cdc085b573d03347af41915a344dd9c, type: 2}
+  _elementDatas:
+  - {fileID: 11400000, guid: e86a033e775c7764897025834f90dab5, type: 2}
+  - {fileID: 11400000, guid: 22fe5509f55418846b76cf2bb50b18df, type: 2}
+  - {fileID: 11400000, guid: 689ea6a4976de93428dbee6c721a96dd, type: 2}
+  - {fileID: 11400000, guid: 03558473db04a8b4a8477e1846d12cd1, type: 2}
+  _spooderData:
+  - {fileID: 11400000, guid: 1cdc085b573d03347af41915a344dd9c, type: 2}
+  - {fileID: 11400000, guid: a79d4ab541003f541903c869aff65650, type: 2}
   _spooderGos:
   - {fileID: 3965815607295164146, guid: 1866516eb6a5d8e44aa39a3b0e8b49e2, type: 3}
   - {fileID: 3965815607295164146, guid: 4d5b4667db0d979498a3a44880513529, type: 3}

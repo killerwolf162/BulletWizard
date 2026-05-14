@@ -15,15 +15,21 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public GameObject gameobject { get; private set; }
     public BulletDecorator activeDecorator { get; set; }
 
+    private List<ElementData> elementData = new List<ElementData>();
+
+    private ElementData _basicElement;
+    private ElementData _fireData;
+    private ElementData _iceData;
+    private ElementData _airData;
+
     public Rigidbody2D rb;
     public Collider2D col;
 
     public int Health => _health;
     public int MaxHealth => _maxHealth;
 
-    public int bonusFireDamage = 1;
-    public int bonusIceDamage = 1;
     public int baseDamage = 1;
+    public float baseBulletSpeed = 5f;
 
     public FireballAbility FireballAbility { get; private set; }
     public ShootBulletAbility ShootBulletAbility { get; private set; }
@@ -44,11 +50,19 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private int _health;
     private int _maxHealth = 10;
 
-    public PlayerController(GameObject gameobject)
+    public PlayerController(GameObject gameobject, List<ElementData> elementList)
     {
         this.gameobject = gameobject;
         rb = gameobject.GetComponent<Rigidbody2D>();
         col = gameobject.GetComponent<Collider2D>();
+
+        elementData.AddRange(elementList);
+        Debug.Log(elementList.Count);
+        _basicElement = elementData[0];
+        _fireData = elementData[1];
+        _iceData = elementData[2];
+        _airData = elementData[3];
+
         Start();
     }
 
@@ -88,10 +102,11 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         //_inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new DashAbility(this));
         _inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, FireballAbility = new FireballAbility(this));
         _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, ShootBulletAbility = new ShootBulletAbility(_bulletPool, this));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(ElementalTypes.Fire, bonusFireDamage + baseDamage, Color.red, true)));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(ElementalTypes.Ice, bonusIceDamage + baseDamage, Color.cyan, true)));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new SetDecoratorCommand(this, new UnDecorator(ElementalTypes.Normal, baseDamage, Color.black)));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_basicElement.type, _basicElement.elementalDmg, _basicElement.elementColor, _basicElement.bulletSpeed)));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_fireData.type, _fireData.elementalDmg, _fireData.elementColor, _fireData.bulletSpeed)));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_iceData.type, _iceData.elementalDmg, _iceData.elementColor, _iceData.bulletSpeed)));
 
+        
     }
 
     public virtual void Update()

@@ -20,6 +20,6 @@ public class UnDecorateBulletCommand : ICommand
 
     private void DecorateBullet()
     {
-        _bulletPool.RequestObject()?.Decorate(new UnDecorator(ElementalTypes.Normal, player.baseDamage, Color.black)); // replace iceDamage with actor.iceDamage(stored in player(?)) so its easier to change values later.
+        //_bulletPool.RequestObject()?.Decorate(new UnDecorator(ElementalTypes.Normal, player.baseDamage, Color.black)); // replace iceDamage with actor.iceDamage(stored in player(?)) so its easier to change values later.
     }
 }

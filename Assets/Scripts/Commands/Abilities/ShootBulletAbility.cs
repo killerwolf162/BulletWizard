@@ -20,6 +20,7 @@ public class ShootBulletAbility : AbilityBase, ICommand
     {
         var bullet = _bulletPool.RequestObject();
         if (bullet == null) return;
+        if (_player.activeDecorator == null) return;
 
         _player.activeDecorator?.Decorate(bullet);
         _bulletPool.ActivateItem(_bulletPool.RequestObject())?.OnEnableObject();

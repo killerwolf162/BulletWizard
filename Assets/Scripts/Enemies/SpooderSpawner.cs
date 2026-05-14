@@ -8,7 +8,7 @@ public class SpooderSpawner : AbstractSpawner
     public virtual GameObject gameobject { get; private set; }
 
     private GameObject[] _prefabs;
-    private EnemyData _enemyData;
+    private List<EnemyData> _enemyData = new List<EnemyData>();
 
     private Transform _spawnPos;
     private Transform _playerPos;
@@ -16,13 +16,13 @@ public class SpooderSpawner : AbstractSpawner
 
     public override IReadOnlyList<Vector3> PatrolPoints => _patrolPoints;
     private List<Vector3> _patrolPoints;
-    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, EnemyData data, List<Vector3> patrolPoints)
+    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, List<EnemyData> data, List<Vector3> patrolPoints)
     {
         this.gameobject = spawner;
         _prefabs = prefabs;
         _spawnPos = spawnPos;
         _playerPos = playerPos;
-        _enemyData = data;
+        _enemyData.AddRange(data);
         _patrolPoints = patrolPoints;
 
         Start();
@@ -61,7 +61,13 @@ public class SpooderSpawner : AbstractSpawner
     public override void Spawn(int type)
     {
         GameObject newEnemyGo = GameHandler.instance.InstantiateNew(_prefabs[type]);
-        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, _enemyData, _spawnPos.position);
+        EnemyData enemyData;
+        if (type == (int)ElementalTypes.Normal)
+            enemyData = _enemyData[0];
+        else
+            enemyData = _enemyData[1];
+
+        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, enemyData, _spawnPos.position);
         RegisterEnemy(enemy);
     }
 } 

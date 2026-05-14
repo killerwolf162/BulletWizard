@@ -11,6 +11,7 @@ public class Bullet : IBullet, ISceneObject
     public HashSet<ElementalTypes> elementalBulletTypes { get; set; } = new HashSet<ElementalTypes>() { ElementalTypes.Normal };
     public int damage { get; set; }
     public Color color { get; set; }
+    public float bulletSpeed { get; set; }
     public bool active { get; set; }
 
     public event Action<Bullet> OnDie;
@@ -26,14 +27,13 @@ public class Bullet : IBullet, ISceneObject
 
     private float timer = 0f;
     private float timeOutTime = 4f;
-    private float _bulletSpeed;
 
-    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, float bulletSpeed = 5f)
+    public Bullet(GameObject bulletPrefab, IShooter shooter, int damage, Color color, float bulletSpeed)
     {
         bullet = bulletPrefab;
         this.damage = damage;
         this.color = color;
-        _bulletSpeed = bulletSpeed;
+        this.bulletSpeed = bulletSpeed;
         _col = bullet.GetComponent<Collider2D>();
         collLookup.Add(_col, this);
         _shooter = shooter;
@@ -81,7 +81,7 @@ public class Bullet : IBullet, ISceneObject
         bullet.transform.rotation = _shooter.GetBulletRotation();
 
         _rend.color = color;
-        _rig.AddForce((_shooter.GetAimDirection().normalized * _bulletSpeed), ForceMode2D.Impulse);
+        _rig.AddForce((_shooter.GetAimDirection().normalized * bulletSpeed), ForceMode2D.Impulse);
     }
 
     public void OnDisableObject()

@@ -24,6 +24,6 @@ public class FireDecorateBulletCommand : ICommand
 
     private void DecorateBullet()
     {
-        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Fire, player.bonusFireDamage + player.baseDamage, Color.red, multiplier));
+        //_bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Fire, player.bonusFireDamage + player.baseDamage, Color.red, 5f, multiplier));
     }
 }

@@ -20,6 +20,6 @@ public class IceDecorateBulletCommand : ICommand
 
     private void DecorateBullet()
     {
-        _bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Ice, player.bonusIceDamage + player.baseDamage, Color.blue));
+        //_bulletPool.RequestObject()?.Decorate(new ElementDecorator(ElementalTypes.Ice, player.bonusIceDamage + player.baseDamage, Color.blue, 5f));
     }
 }

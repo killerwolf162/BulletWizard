@@ -40,6 +40,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private int _damage;
     private int _health;
     private int _score;
+    private float _bulletSpeed = 5f;
 
     [Header("BulletPool")]
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
@@ -78,9 +79,9 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             var bullet = CreateBullet(bulletGO);
 
             if (_elementType == ElementalTypes.Fire)
-                bullet.Decorate(new ElementDecorator(ElementalTypes.Fire, _damage, Color.red, true));
+                bullet.Decorate(new ElementDecorator(ElementalTypes.Fire, _damage, Color.red, _bulletSpeed));
             else if (_elementType == ElementalTypes.Ice)
-                bullet.Decorate(new ElementDecorator(ElementalTypes.Ice, _damage, Color.blue, true));
+                bullet.Decorate(new ElementDecorator(ElementalTypes.Ice, _damage, Color.blue, _bulletSpeed));
 
             _bulletPool._inactivePool.Add(bullet);
         }
@@ -249,21 +250,28 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             {
                 if (Bullet.collLookup.TryGetValue(otherCollider, out var bullet))
                 {
-                    if (bullet.elementalBulletTypes.Contains(ElementalTypes.Normal))
+                    if (bullet.elementalBulletTypes.Contains(ElementalTypes.Normal) || bullet.elementalBulletTypes.Contains(ElementalTypes.Air)) //normal and air bullet always do normal dmg
                     {
                         TakeDamage(bullet.damage);
                         bullet.Die();
+                        return;
+                    }                    
+                    
+                    if(_elementType == ElementalTypes.Normal) // if normal spider always take normal bullet dmg
+                    {
+                        TakeDamage(bullet.damage);
+                        bullet.Die();
+                        return;
                     }
-                    else if (bullet.elementalBulletTypes.Contains(_elementType))
+
+                    if (bullet.elementalBulletTypes.Contains(_elementType)) // if bullet same element as spider take no dmg
                     {
                         bullet.Die();
-                        Debug.Log("The enemy has the same element, it does no damage!");
                     }
-                    else // different element
+                    else
                     {
-                        TakeDamage(bullet.damage * 2);
+                        TakeDamage(bullet.damage * 2); // oterwise bullet opposite element, take double dmg
                         bullet.Die();
-                        Debug.Log("The enemy has a different element, it does 2x damage!");
                     }
                 }
             }

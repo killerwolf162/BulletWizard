@@ -33,8 +33,11 @@ public class GameHandler : MonoBehaviour
     private GameObject[] _enemySpawners;
     private List<Vector3>[] _spawnerPatrolPoints;
 
+    [Header("Player Data")]
+    [SerializeField] private List<ElementData> _elementDatas = new List<ElementData>();
+
     [Header("EnemyGos & Data")]
-    [SerializeField] private EnemyData _spooderData;
+    [SerializeField] private List<EnemyData> _spooderData;
     [SerializeField] private GameObject[] _spooderGos;
 
     [Header("UI")]
@@ -43,8 +46,8 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private Image _bulletCooldownOverlay;
     [SerializeField] private Image _fireBallCooldownOverlay;
 
-    public Camera cam;   
-    
+    public Camera cam;
+
     private ISceneObject _player;
     private List<IUpdateable> _updateables = new List<IUpdateable>();
     private PlayerHUD _hud;
@@ -115,10 +118,10 @@ public class GameHandler : MonoBehaviour
 
         int playerRoomIdx = 0;
         float bestDist = float.MaxValue;
-        for(int i = 0; i< roomCenters.Count; i++)
+        for (int i = 0; i < roomCenters.Count; i++)
         {
             float d = (roomCenters[i] - avg).sqrMagnitude;
-            if(d < bestDist)
+            if (d < bestDist)
             {
                 bestDist = d;
                 playerRoomIdx = i;
@@ -128,12 +131,12 @@ public class GameHandler : MonoBehaviour
         Vector3 playerWorld = FloorPosToWorld(playerCell);
 
         GameObject playerGo = Instantiate(_playerPrefab, playerWorld, Quaternion.identity);
-        _player = new PlayerController(playerGo);
+        _player = new PlayerController(playerGo, _elementDatas);
 
         // Spawn spawners //
 
         List<int> roomIdcs = new List<int>();
-        for(int i = 0; i< roomCenters.Count; i++)
+        for (int i = 0; i < roomCenters.Count; i++)
         {
             if (i == playerRoomIdx)
                 continue;
@@ -141,7 +144,7 @@ public class GameHandler : MonoBehaviour
         }
 
         //shuffle spawner rooms
-        for(int i = roomIdcs.Count - 1; i> 0; i--)
+        for (int i = roomIdcs.Count - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
             int temp = roomIdcs[i];
@@ -206,13 +209,7 @@ public class GameHandler : MonoBehaviour
             GameObject spawner = _enemySpawners[i];
             List<Vector3> patrolPoints = _spawnerPatrolPoints[i];
 
-            var spawnerGO = new SpooderSpawner(
-                spawner,
-                _spooderGos,
-                spawner.transform,
-                _player.gameobject.transform,
-                _spooderData,
-                patrolPoints);
+            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints);
         }
     }
 

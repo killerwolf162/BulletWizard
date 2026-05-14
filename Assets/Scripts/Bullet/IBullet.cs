@@ -9,6 +9,8 @@ public interface IBullet : IPoolable
 
     public HashSet<ElementalTypes> elementalBulletTypes { get; set; }
 
+    public float bulletSpeed { get; set; }
+
     public void Decorate(BulletDecorator decorator);
 }
 
