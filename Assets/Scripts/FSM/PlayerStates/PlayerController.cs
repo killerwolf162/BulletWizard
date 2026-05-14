@@ -6,8 +6,6 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 {
     internal const int WALL_LAYER_MASK = 1 << 7;
 
-    //public event Action<int, int> OnHealthChanged;
-
     [Header("StateMachine")]
     public StateMachine<PlayerController> stateMachine;
     public ScratchPad sharedData => new ScratchPad();
@@ -15,6 +13,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public PlayerMove moveState { get; private set; } = new PlayerMove();
 
     public GameObject gameobject { get; private set; }
+    public BulletDecorator activeDecorator { get; set; }
 
     public Rigidbody2D rb;
     public Collider2D col;
@@ -29,14 +28,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public FireballAbility FireballAbility { get; private set; }
     public ShootBulletAbility ShootBulletAbility { get; private set; }
 
-    public Color NextBulletColor
-    {
-        get
-        {
-            var next = _bulletPool.RequestObject();
-            return next != null ? next.color : Color.black;
-        }
-    }
+    public Color NextBulletColor => activeDecorator?.Color ?? Color.black;
 
     private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
 
@@ -95,11 +87,11 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         //initialize input bindings
         //_inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new DashAbility(this));
         _inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, FireballAbility = new FireballAbility(this));
-        _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, ShootBulletAbility = new ShootBulletAbility(_bulletPool));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new FireDecorateBulletCommand(_bulletPool, this));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new IceDecorateBulletCommand(_bulletPool, this));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new UnDecorateBulletCommand(_bulletPool, this));
-        
+        _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, ShootBulletAbility = new ShootBulletAbility(_bulletPool, this));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(ElementalTypes.Fire, bonusFireDamage + baseDamage, Color.red, true)));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(ElementalTypes.Ice, bonusIceDamage + baseDamage, Color.cyan, true)));
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new SetDecoratorCommand(this, new UnDecorator(ElementalTypes.Normal, baseDamage, Color.black)));
+
     }
 
     public virtual void Update()
@@ -114,19 +106,17 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         stateMachine?.Update();
 
 
-        if(col != null)
+        if (col != null)
         {
             HandleEnemyBulletHits();
         }
-        
+
         SetCameraPosition();
     }
 
     private void TakeDamage(int amount)
     {
         _health -= amount;
-        //OnHealthChanged?.Invoke(_health, _maxHealth);
-        Debug.Log($" damage taken: {amount}, current health: {_health}");
         if (_health <= 0)
             Die();
     }
@@ -134,6 +124,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private void Die()
     {
         GameHandler.instance.UnSubscribe(this);
+        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b.gameobject); });
+        GameHandler.instance.PlayerDied();
         GameHandler.instance.DestroyObject(gameobject);
     }
 

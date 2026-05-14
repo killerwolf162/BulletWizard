@@ -12,7 +12,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private ElementalTypes _elementType;
 
     [Header("StateMachine")]
-    private StateMachine<EnemyBehaviour> stateMachine;
+    private StateMachine<EnemyBehaviour> _stateMachine;
     public ScratchPad sharedData => new ScratchPad();
     public EnemyIdle idleState { get; private set; } = new EnemyIdle();
     public EnemyPatrol patrolState { get; private set; } = new EnemyPatrol();
@@ -64,6 +64,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public virtual void Start()
     {
+        GameHandler.instance.onPlayerDied += DisableAI;
+
         GameObject bulletObject = Resources.Load("spooderBullet", typeof(GameObject)) as GameObject;
         if (_bulletPool._inactivePool == null)
         {
@@ -89,8 +91,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         GameHandler.instance.Subscribe(this);
 
         //initialize statemachine and entry state
-        stateMachine = new StateMachine<EnemyBehaviour>(this);
-        stateMachine.SetState(idleState);
+        _stateMachine = new StateMachine<EnemyBehaviour>(this);
+        _stateMachine.SetState(idleState);
 
         foreach (Bullet bullet in _bulletPool._inactivePool)
         {
@@ -110,7 +112,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
         //update loop statemachine.
         CheckPlayerInRange();
-        stateMachine?.Update();
+        _stateMachine?.Update();
 
 
         if (col != null)
@@ -120,11 +122,24 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     }
 
+    private void DisableAI()
+    {
+        Debug.Log("DisableAI");
+        _player = null;
+        _stateMachine.SetState(idleState);
+    }
+
     //check if the enemy gives chase or attacks
     public void CheckPlayerInRange()
     {
         if (gameobject == null || _player == null)
+        {
+            inChaseRange = false;
+            inAttackRange = false;
+            hasReachedThreshold = false;
             return;
+        }
+            
 
         float distance = Vector3.Distance(gameobject.transform.position, _player.transform.position);
         bool canSee = distance <= chaseRange && HasLineOfSightToPlayer();
@@ -204,14 +219,12 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     {
         _spawner?.UnregisterEnemy(this);
         GameHandler.instance.UnSubscribe(this);
+        GameHandler.instance.onPlayerDied -= DisableAI;
 
-        _bulletPool?.DestroyAll(b =>
-        {
-            GameHandler.instance.DestroyObject(b.gameobject);
-        });
+        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b.gameobject); });
+
         _bulletPool = null;
         GameHandler.instance.DestroyObject(gameobject);
-
         GameHandler.instance.IncreaseScore(_score);
     }
 

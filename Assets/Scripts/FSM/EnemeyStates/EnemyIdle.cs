@@ -6,6 +6,7 @@ public class EnemyIdle : AState<EnemyBehaviour>
 
     public override void Start(EnemyBehaviour runner)
     {
+        Debug.Log("entered idle");
         base.Start(runner);
         _currentTime = _timer;
     }

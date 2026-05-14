@@ -2,29 +2,33 @@
 
 public class UnDecorator : BulletDecorator
 {
-    private ElementalTypes bulletType;
-    private Color color;
+    private ElementalTypes _bulletType;
+    private Color _color;
+
+    public override Color Color => _color;
 
     public UnDecorator(ElementalTypes bulletType, int damage, Color color)
     {
-        this.bulletType = bulletType;
         this.damage = damage;
-        this.color = color;
+        _bulletType = bulletType;
+        _color = color;
 
     }
 
+
+
     public override IBullet Decorate(IBullet bullet)
     {
-        if (bullet.elementalBulletTypes.Contains(bulletType)) // checks if bullet is standard
+        if (bullet.elementalBulletTypes.Contains(_bulletType)) // checks if bullet is standard
         {
             return bullet;
         }
         else
         {
             bullet.elementalBulletTypes.Clear(); // clear all decorations, reset to standard
-            bullet.elementalBulletTypes.Add(bulletType);
+            bullet.elementalBulletTypes.Add(_bulletType);
             bullet.damage -= damage;
-            bullet.color = color;
+            bullet.color = _color;
             return bullet;
         }
     }

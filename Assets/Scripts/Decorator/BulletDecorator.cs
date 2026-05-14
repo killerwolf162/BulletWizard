@@ -1,6 +1,9 @@
-﻿public abstract class BulletDecorator
+﻿using UnityEngine;
+
+public abstract class BulletDecorator
 {
     public int damage { get; set; }
+    public abstract Color Color { get; }
 
     public BulletDecorator()
     {

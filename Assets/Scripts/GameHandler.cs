@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using System;
 using TMPro;
+using UnityEngine.Events;
 
 public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
+    public event Action onPlayerDied;
 
     [Header("Tilemaps")]
     [SerializeField] private Tilemap floorMap;
@@ -212,6 +214,12 @@ public class GameHandler : MonoBehaviour
                 _spooderData,
                 patrolPoints);
         }
+    }
+
+    public void PlayerDied()
+    {
+        Debug.Log("PlayerDied");
+        onPlayerDied?.Invoke();
     }
 
     public void IncreaseScore(int scoreToAdd)

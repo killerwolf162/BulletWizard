@@ -17,7 +17,6 @@ public class EnemyAttack : AState<EnemyBehaviour>
         base.Update(runner);
 
         _currentTime -= Time.deltaTime;
-
         //Attack Logic    
         if (_currentTime <= 0f)
         {             

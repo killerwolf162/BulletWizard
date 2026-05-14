@@ -35,7 +35,7 @@ public class EnemyChase : AState<EnemyBehaviour>
             return;
         }
 
-        if(runner.hasReachedThreshold)
+        if (runner.hasReachedThreshold)
         {
             onSwitch(runner.attackState);
             return;
@@ -45,7 +45,7 @@ public class EnemyChase : AState<EnemyBehaviour>
         _repathTimer += Time.deltaTime;
 
 
-        if (floorMap != null)
+        if (floorMap != null && runner._player != null)
         {
             Vector3Int playerCell = floorMap.WorldToCell(runner._player.position);
             if (playerCell != _lastTargetCell || _repathTimer >= RepathInterval)

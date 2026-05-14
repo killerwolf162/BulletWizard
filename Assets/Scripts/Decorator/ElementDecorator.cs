@@ -2,39 +2,41 @@
 
 public class ElementDecorator : BulletDecorator
 {
-    private ElementalTypes bulletType;
-    private Color color;
-    private bool multiplier;
+    private ElementalTypes _bulletType;
+    private Color _color;
+    private bool _multiplier;
+
+    public override Color Color => _color;
 
     public ElementDecorator(ElementalTypes bulletType, int damage, Color color, bool multiplier = false)
     {
-        this.bulletType = bulletType;
+        this._bulletType = bulletType;
         this.damage = damage;
-        this.color = color;
-        this.multiplier = multiplier;
+        this._color = color;
+        this._multiplier = multiplier;
     }
 
     public override IBullet Decorate(IBullet bullet)
     {
-        if (bullet.elementalBulletTypes.Contains(bulletType))
+        if (bullet.elementalBulletTypes.Contains(_bulletType))
         {
             return bullet;
         }
         if (bullet.elementalBulletTypes.Contains(ElementalTypes.Normal)) // check if bullet is not decorated
         {
-            bullet.elementalBulletTypes.Add(bulletType);
+            bullet.elementalBulletTypes.Add(_bulletType);
             bullet.elementalBulletTypes.Remove(ElementalTypes.Normal);
-            if(multiplier)
+            if(_multiplier)
                 bullet.damage += damage;
-            bullet.color = color;
+            bullet.color = _color;
             return bullet;
         }
 
         else // if bullet is already decorted with same or other decoration, return
         {
             bullet.elementalBulletTypes.Clear();
-            bullet.elementalBulletTypes.Add(bulletType);
-            bullet.color = color;
+            bullet.elementalBulletTypes.Add(_bulletType);
+            bullet.color = _color;
             return bullet;
         }      
     }
