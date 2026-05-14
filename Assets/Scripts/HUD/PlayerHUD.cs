@@ -35,8 +35,14 @@ public class PlayerHUD : IUpdateable
     {
         _healthSlider.value = (float)_player.Health;
         _fireBallCoolddownOverlay.fillAmount = 1f - _fireball?.CooldownProgress ?? 0f;
-        _bulletCoolddownOverlay.fillAmount = 1f - _bullet?.CooldownProgress ?? 0f;
-        _bulletCoolddownOverlay.color = _player.NextBulletColor;
         _scoreText.text = $"Score: {GameHandler.instance.Score}";
+
+        if (_player.activeDecorator == null)
+            _bulletCoolddownOverlay.fillAmount = 0f;
+        else
+        {
+            _bulletCoolddownOverlay.fillAmount = 1f - _bullet?.CooldownProgress ?? 0f;
+            _bulletCoolddownOverlay.color = _player.NextBulletColor;
+        }       
     }
 }
