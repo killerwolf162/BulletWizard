@@ -13,7 +13,6 @@ MonoBehaviour:
   m_Name: AirElement
   m_EditorClassIdentifier: 
   type: 3
-  extraElementalDmg: 1
+  elementalDmg: 0
   elementColor: {r: 1, g: 1, b: 1, a: 1}
-  bulletSpeed: 8
-  multiplier: 0
+  bulletSpeed: 12

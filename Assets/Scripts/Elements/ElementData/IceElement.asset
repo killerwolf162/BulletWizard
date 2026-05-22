@@ -15,4 +15,4 @@ MonoBehaviour:
   type: 2
   elementalDmg: 2
   elementColor: {r: 0, g: 1, b: 0.983747, a: 1}
-  bulletSpeed: 5
+  bulletSpeed: 8

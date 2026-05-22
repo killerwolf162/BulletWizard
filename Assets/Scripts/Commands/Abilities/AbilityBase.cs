@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class AbilityBase : IUpdateable
 {
     protected abstract float cooldownTime { get; }
+    protected int manaCost;
     protected float activeCooldown = 0;
 
     public void Start()
@@ -19,7 +20,6 @@ public abstract class AbilityBase : IUpdateable
     {
         if (CooldownReady())
         {
-            activeCooldown = cooldownTime;
             Cast();
         }
     }

@@ -11,7 +11,6 @@ public class EnemyPatrol : AState<EnemyBehaviour>
 
     public override void Start(EnemyBehaviour runner)
     {
-        Debug.Log("Enter Patrol");
         base.Start(runner);
 
         _walkPointSet = false;

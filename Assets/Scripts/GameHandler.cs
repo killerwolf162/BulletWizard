@@ -42,6 +42,7 @@ public class GameHandler : MonoBehaviour
 
     [Header("UI")]
     [SerializeField] private Slider _healthSlider;
+    [SerializeField] private Slider _manaSlider;
     [SerializeField] private TMP_Text _scoreText;
     [SerializeField] private Image _bulletCooldownOverlay;
     [SerializeField] private Image _fireBallCooldownOverlay;
@@ -181,7 +182,7 @@ public class GameHandler : MonoBehaviour
         SpawnSpooderSpawner();
 
         var playerController = (PlayerController)_player;
-        _hud = new PlayerHUD(_healthSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, playerController, playerController.FireballAbility, playerController.ShootBulletAbility);
+        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, playerController, playerController.FireballAbility, playerController.ShootBulletAbility);
     }
 
     // Picks a random floor tile from the room, or falls back to the room center if empty.

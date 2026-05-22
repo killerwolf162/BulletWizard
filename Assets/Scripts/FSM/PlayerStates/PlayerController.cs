@@ -6,49 +6,57 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 {
     internal const int WALL_LAYER_MASK = 1 << 7;
 
+    public event Action<(int previous, int next, int delta)> ManaChanged;
+    public event Action<(int previous, int next, int delta)> HealthChanged;
+
+    public Rigidbody2D rb;
+    public Collider2D col;
+
     [Header("StateMachine")]
     public StateMachine<PlayerController> stateMachine;
     public ScratchPad sharedData => new ScratchPad();
     public PlayerIdle idleState { get; private set; } = new PlayerIdle();
     public PlayerMove moveState { get; private set; } = new PlayerMove();
 
+    [Header("Player things")]
     public GameObject gameobject { get; private set; }
     public BulletDecorator activeDecorator { get; set; }
-
+    public FireballAbility FireballAbility { get; private set; }
+    public ShootBulletAbility ShootBulletAbility { get; private set; }
     private List<ElementData> elementData = new List<ElementData>();
-
+    private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
+    private InputHandler _inputHandler = new InputHandler();
+    private Camera _cam;
     private ElementData _basicElement;
     private ElementData _fireData;
     private ElementData _iceData;
     private ElementData _airData;
 
-    public Rigidbody2D rb;
-    public Collider2D col;
 
+    [Header("Gameplay variables")]
     public int Health => _health;
     public int MaxHealth => _maxHealth;
+    public int Mana => _mana;
+    public int MaxMana => _maxMana;
 
     public int baseDamage = 1;
     public float baseBulletSpeed = 5f;
-
-    public FireballAbility FireballAbility { get; private set; }
-    public ShootBulletAbility ShootBulletAbility { get; private set; }
-
-    public Color NextBulletColor => activeDecorator?.Color ?? Color.black;
-
-    private ObjectPool<Bullet> _bulletPool = new ObjectPool<Bullet>(new List<Bullet>() { });
-
-    private InputHandler _inputHandler = new InputHandler();
-
-    private Camera _cam;
-    private Vector3 _mousePos;
-    private Vector3 _lastSafePosition;
-
-    private float _damageTimeOut;
+    public int baseManaCost = 1;
+    public int elementalManaCost = 2;
+    public int fireballManaCost = 4;
 
     private int _spellCount = 15;
     private int _health;
     private int _maxHealth = 10;
+    private int _mana;
+    private int _maxMana = 10;
+    private int _manaRecoveryAmount = 1;
+    private float _manaRecoveryInterval = 1f;   
+    private float _manaRecoveryTimer = 0f;
+
+    [Header("Misc")]
+    public Color NextBulletColor => activeDecorator?.Color ?? Color.black;
+    private Vector3 _mousePos;
 
     public PlayerController(GameObject gameobject, List<ElementData> elementList)
     {
@@ -97,6 +105,11 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         }
 
         _health = _maxHealth;
+        _mana = _maxMana;
+
+        //Set starting decorator so player can shoot at start
+        var startingDecorator = new ElementDecorator(_basicElement.type, _basicElement.elementalDmg, _basicElement.elementColor, _basicElement.bulletSpeed);
+        activeDecorator = startingDecorator;
 
         //initialize input bindings
         //_inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new DashAbility(this));
@@ -113,27 +126,40 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     {
         _inputHandler.HandleInput();
 
-        _damageTimeOut -= Time.deltaTime;
-
         Vector3 previousPos = gameobject.transform.position;
+
+        // Mana regen Tick
+        if(_mana < _maxMana)
+        {
+            _manaRecoveryTimer += Time.deltaTime;
+            if(_manaRecoveryTimer >= _manaRecoveryInterval)
+            {
+                _manaRecoveryTimer = 0f;
+                ModifyMana(_manaRecoveryAmount);
+            }
+        }
 
         //update loop statemachine
         stateMachine?.Update();
-
-
-        if (col != null)
-        {
-            HandleEnemyBulletHits();
-        }
-
+        if (col != null) HandleEnemyBulletHits();
         SetCameraPosition();
     }
 
-    private void TakeDamage(int amount)
+    public void ModifyHealth(int amount)
     {
-        _health -= amount;
-        if (_health <= 0)
+        int previous = _health;
+        _health = Mathf.Clamp(_health + amount, 0, _maxHealth);
+        HealthChanged?.Invoke((previous, _health, _health - previous));
+
+        if (_health == 0)
             Die();
+    }
+
+    public void ModifyMana(int amount)
+    {
+        int previous = _mana;
+        _mana = Mathf.Clamp(_mana + amount, 0, _maxMana);
+        ManaChanged?.Invoke((previous, _mana, _mana - previous));
     }
 
     private void Die()
@@ -203,7 +229,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
             {
                 if (Bullet.collLookup.TryGetValue(otherCollider, out var bullet))
                 {
-                    TakeDamage(bullet.damage);
+                    ModifyHealth(-bullet.damage);
                     bullet.Die();
                 }
             }
