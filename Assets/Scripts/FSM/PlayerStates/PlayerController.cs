@@ -6,8 +6,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 {
     internal const int WALL_LAYER_MASK = 1 << 7;
 
-    public event Action<(int previous, int next, int delta)> ManaChanged;
-    public event Action<(int previous, int next, int delta)> HealthChanged;
+    public event Action<int> ManaChanged;
+    public event Action<int> HealthChanged;
 
     public Rigidbody2D rb;
     public Collider2D col;
@@ -147,9 +147,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public void ModifyHealth(int amount)
     {
-        int previous = _health;
         _health = Mathf.Clamp(_health + amount, 0, _maxHealth);
-        HealthChanged?.Invoke((previous, _health, _health - previous));
+        HealthChanged?.Invoke(_health);
 
         if (_health == 0)
             Die();
@@ -157,9 +156,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public void ModifyMana(int amount)
     {
-        int previous = _mana;
         _mana = Mathf.Clamp(_mana + amount, 0, _maxMana);
-        ManaChanged?.Invoke((previous, _mana, _mana - previous));
+        ManaChanged?.Invoke( _mana);
     }
 
     private void Die()

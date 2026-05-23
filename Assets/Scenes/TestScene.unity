@@ -150,9 +150,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floorMap: {fileID: 1354921044}
   wallMap: {fileID: 1354921043}
-  walkData: {fileID: 11400000, guid: 679bd074aa950fc408b43f28df865b07, type: 2}
+  walkData: {fileID: 11400000, guid: 207603a4e43580d4bb2374654ad12826, type: 2}
   wallParameters: {fileID: 11400000, guid: eeb7f0df826f6f64f81db7abce3fa75f, type: 2}
-  roomParameters: {fileID: 11400000, guid: d667981c416f8564c9630d97a21d2b90, type: 2}
+  secretRoomParameters: {fileID: 11400000, guid: d667981c416f8564c9630d97a21d2b90, type: 2}
+  dungeonParameters: {fileID: 11400000, guid: 91d196aa0c71f384fab92b949011b3a5, type: 2}
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
   _maxSpawners: 10
@@ -1099,7 +1100,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Score: NaN'
+  m_text: 'Score: 0'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

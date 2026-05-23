@@ -6,19 +6,6 @@ using UnityEngine;
 
 public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 {
-    [SerializeField] private int minRoomWidth = 5;
-    [SerializeField] private int minRoomHeight = 5;
-    [SerializeField] private int minRoomCount = 7;
-
-    [SerializeField] private int dungeonWidth = 50;
-    [SerializeField] private int dungeonHeight = 50;
-
-    [SerializeField] private bool randomWalkRooms = false;
-    [Range(0, 10)] [SerializeField] private int offset = 1;
-
-    [Range(0.0f, 1f)] [SerializeField] private float mediumCorridorPercent = 0.25f; // ~width 2
-    [Range(0.0f, 1f)] [SerializeField] private float largeCorridorPercent = 0.25f;  // ~width 3
-
     public IReadOnlyList<BoundsInt> Rooms => _rooms;
     public IReadOnlyList<Vector2Int> RoomCenters => _roomCenters;
     public IReadOnlyList<List<Vector2Int>> RoomFloors => _roomFloors;
@@ -28,14 +15,17 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     private List<Vector2Int> _roomCenters;
     private List<List<Vector2Int>> _roomFloors;
     private HashSet<Vector2Int> _allFloorPositions;
+    private DungeonData _dungeonData;
 
 
-    public RoomFirstDungeonGenerator(TilemapVisualizer visualizer, SimpleRandomWalkData walkData, WallGenerationParameters wallParameters, SecretRoomParameters roomParameters)
+    public RoomFirstDungeonGenerator(TilemapVisualizer visualizer, SimpleRandomWalkData walkData, DungeonData dungeonData, WallGenerationParameters wallParameters, SecretRoomParameters roomParameters)
     {
         tilemapVisualizer = visualizer;
         randomWalkParameters = walkData;
         wallGeneratorParameters = wallParameters;
         secertRoomParameters = roomParameters;
+
+        _dungeonData = dungeonData;
     }
 
     private void Awake()
@@ -50,10 +40,10 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         do
         {
             _roomList = ProceduralGenerationAlgorithm.BinarySpacePartitioning(new BoundsInt((Vector3Int)startPos,
-            new Vector3Int(dungeonWidth, dungeonHeight, 0)),
-            minRoomWidth, minRoomHeight);
+            new Vector3Int(_dungeonData._dungeonWidth, _dungeonData._dungeonHeight, 0)),
+            _dungeonData._minRoomWidth, _dungeonData._minRoomHeight);
         }
-        while (_roomList.Count < minRoomCount);
+        while (_roomList.Count < _dungeonData._minRoomCount);
 
         CreateRooms(_roomList);
     }
@@ -62,7 +52,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
     {
         HashSet<Vector2Int> floor;
 
-        if(randomWalkRooms)
+        if(_dungeonData._randomWalkRooms)
             floor = CreateWalkRooms(roomList);
         else
             floor = CreateSimpleRooms(roomList);
@@ -78,9 +68,9 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
 
             var thisRoomFloors = new List<Vector2Int>();
 
-            for(int x = room.xMin + offset; x < room.xMax - offset; x++)
+            for(int x = room.xMin + _dungeonData._offset; x < room.xMax - _dungeonData._offset; x++)
             {
-                for (int y = room.yMin + offset; y < room.yMax - offset; y++)
+                for (int y = room.yMin + _dungeonData._offset; y < room.yMax - _dungeonData._offset; y++)
                 {
                     var pos = new Vector2Int(x, y);
                     if (floor.Contains(pos))
@@ -94,7 +84,7 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         HashSet<Vector2Int> corridors = ConnectRooms(_roomCenters.ToList(), out corridorPaths);
 
         floor.UnionWith(corridors);
-        IncreaseCorridors(corridorPaths, floor, mediumCorridorPercent, largeCorridorPercent);
+        IncreaseCorridors(corridorPaths, floor, _dungeonData._mediumCorridorPercent, _dungeonData._largeCorridorPercent);
 
         _allFloorPositions = floor;
 
@@ -112,8 +102,8 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
             var _roomFloor = RunRandomWalk(randomWalkParameters, _roomCenter);
             foreach (var _position in _roomFloor)
             {
-                if (_position.x >= (_roomBounds.xMin + offset) && _position.x <= (_roomBounds.xMax - offset) && 
-                    _position.y >= (_roomBounds.yMin + offset) && _position.y <= (_roomBounds.yMax - offset))
+                if (_position.x >= (_roomBounds.xMin + _dungeonData._offset) && _position.x <= (_roomBounds.xMax - _dungeonData._offset) && 
+                    _position.y >= (_roomBounds.yMin + _dungeonData._offset) && _position.y <= (_roomBounds.yMax - _dungeonData._offset))
                 {
                     _floor.Add(_position);
                 }
@@ -127,9 +117,9 @@ public class RoomFirstDungeonGenerator : SimpleRandomWalkDungeonGenerator
         HashSet<Vector2Int> _floor = new();
         foreach (var _room in _roomList)
         {
-            for (int col = offset; col < _room.size.x - offset; col++)
+            for (int col = _dungeonData._offset; col < _room.size.x - _dungeonData._offset; col++)
             {
-                for (int row = offset; row < _room.size.y; row++)
+                for (int row = _dungeonData._offset; row < _room.size.y; row++)
                 {
                     Vector2Int _pos = (Vector2Int)_room.min + new Vector2Int(col, row);
                     _floor.Add(_pos);

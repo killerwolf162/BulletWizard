@@ -10,8 +10,8 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9534077b7b2ee5e41bea68472c79baf2, type: 3}
-  m_Name: SmallDungeon
+  m_Name: BigRooms
   m_EditorClassIdentifier: 
-  iterations: 10
-  walkLenght: 10
+  iterations: 100
+  walkLenght: 100
   startRandomEachIt: 1

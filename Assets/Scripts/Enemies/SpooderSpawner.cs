@@ -13,10 +13,11 @@ public class SpooderSpawner : AbstractSpawner
     private Transform _spawnPos;
     private Transform _playerPos;
     private int _maxSpooders = 2;
+    private bool _alwaysChase;
 
     public override IReadOnlyList<Vector3> PatrolPoints => _patrolPoints;
     private List<Vector3> _patrolPoints;
-    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, List<EnemyData> data, List<Vector3> patrolPoints)
+    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, List<EnemyData> data, List<Vector3> patrolPoints, bool alwaysChase)
     {
         this.gameobject = spawner;
         _prefabs = prefabs;
@@ -24,6 +25,7 @@ public class SpooderSpawner : AbstractSpawner
         _playerPos = playerPos;
         _enemyData.AddRange(data);
         _patrolPoints = patrolPoints;
+        _alwaysChase = alwaysChase;
 
         Start();
     }
@@ -67,7 +69,7 @@ public class SpooderSpawner : AbstractSpawner
         else
             enemyData = _enemyData[1];
 
-        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, enemyData, _spawnPos.position);
+        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, enemyData, _spawnPos.position, _alwaysChase);
         RegisterEnemy(enemy);
     }
 } 

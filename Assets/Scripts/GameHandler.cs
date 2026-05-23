@@ -9,7 +9,8 @@ using UnityEngine.Events;
 public class GameHandler : MonoBehaviour
 {
     public static GameHandler instance;
-    public event Action onPlayerDied;
+    public event Action OnPlayerDied;
+    public event Action<int> ScoreChanged;
 
     [Header("Tilemaps")]
     [SerializeField] private Tilemap floorMap;
@@ -21,7 +22,8 @@ public class GameHandler : MonoBehaviour
     [Header("DungeonGeneration")]
     [SerializeField] private SimpleRandomWalkData walkData;
     [SerializeField] private WallGenerationParameters wallParameters;
-    [SerializeField] private SecretRoomParameters roomParameters;
+    [SerializeField] private SecretRoomParameters secretRoomParameters;
+    [SerializeField] private DungeonData dungeonParameters;
 
     private TilemapVisualizer _tilemapVisualizer;
     private RoomFirstDungeonGenerator _generator;
@@ -37,6 +39,7 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private List<ElementData> _elementDatas = new List<ElementData>();
 
     [Header("EnemyGos & Data")]
+    [SerializeField] private bool _alwaysChase = false; // for wave based shooter?
     [SerializeField] private List<EnemyData> _spooderData;
     [SerializeField] private GameObject[] _spooderGos;
 
@@ -49,7 +52,7 @@ public class GameHandler : MonoBehaviour
 
     public Camera cam;
 
-    private ISceneObject _player;
+    private PlayerController _player;
     private List<IUpdateable> _updateables = new List<IUpdateable>();
     private PlayerHUD _hud;
     public int Score => _score;
@@ -63,16 +66,14 @@ public class GameHandler : MonoBehaviour
 
     private void Start()
     {
-        Application.targetFrameRate = 60;
         instance = this;
         _tilemapVisualizer = new TilemapVisualizer(floorMap, wallMap);
-        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, wallParameters, roomParameters);
+        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, dungeonParameters, wallParameters, secretRoomParameters);
         _generator.GenerateDungeon();
 
         Pathfinder = new AStarPathfinder(floorMap, wallMap);
 
         cam = FindAnyObjectByType<Camera>();
-
         SpawnPlayerAndSpawners();
     }
 
@@ -97,6 +98,12 @@ public class GameHandler : MonoBehaviour
         {
             _updateables.Remove(updateable);
         }
+    }
+
+    public void ModifyScore(int amount)
+    {
+        _score += amount;
+        ScoreChanged?.Invoke(_score);
     }
 
     private void SpawnPlayerAndSpawners()
@@ -181,8 +188,7 @@ public class GameHandler : MonoBehaviour
         }
         SpawnSpooderSpawner();
 
-        var playerController = (PlayerController)_player;
-        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, playerController, playerController.FireballAbility, playerController.ShootBulletAbility);
+        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, _player, _player.FireballAbility, _player.ShootBulletAbility);
     }
 
     // Picks a random floor tile from the room, or falls back to the room center if empty.
@@ -210,19 +216,14 @@ public class GameHandler : MonoBehaviour
             GameObject spawner = _enemySpawners[i];
             List<Vector3> patrolPoints = _spawnerPatrolPoints[i];
 
-            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints);
+            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints, _alwaysChase);
         }
     }
 
     public void PlayerDied()
     {
         Debug.Log("PlayerDied");
-        onPlayerDied?.Invoke();
-    }
-
-    public void IncreaseScore(int scoreToAdd)
-    {
-        _score += scoreToAdd;
+        OnPlayerDied?.Invoke();
     }
 
     public GameObject InstantiateNew(GameObject gameObject)

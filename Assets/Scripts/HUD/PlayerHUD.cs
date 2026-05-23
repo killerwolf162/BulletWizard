@@ -28,42 +28,55 @@ public class PlayerHUD : IUpdateable
         _manaSlider.maxValue = _player.MaxMana;
 
         // Subscribe to GameHandler's update loop
+        GameHandler.instance.Subscribe(this);
+        Start();
+    }
+
+    public void Start()// Subscribe to events
+    {        
         _player.HealthChanged += OnHealthChanged;
         _player.ManaChanged += OnManaChanged;
-        GameHandler.instance.Subscribe(this);
+        GameHandler.instance.ScoreChanged += OnScoreChanged;
     }
 
-    public void Start()
+    private void OnManaChanged(int newValue)
     {
+        _manaSlider.value = newValue;
     }
 
-    private void OnManaChanged((int previous, int next, int delta) e)
+    private void OnHealthChanged(int newValue)
     {
-        _manaSlider.value = e.next;
+        _healthSlider.value = newValue;
     }
 
-    private void OnHealthChanged((int previous, int next, int delta) e)
+    private void OnScoreChanged(int newValue)
     {
-        _healthSlider.value = e.next;
+        _scoreText.text = $"Score: {newValue}";
     }
 
     public void Update()
     {
-        _fireBallCoolddownOverlay.fillAmount = 1f - _fireball?.CooldownProgress ?? 0f;
-        _scoreText.text = $"Score: {GameHandler.instance.Score}";
+        if (_fireball.CooldownProgress > 0)
+            _fireBallCoolddownOverlay.fillAmount = 1f - _fireball?.CooldownProgress ?? 0f;
 
         if (_player.activeDecorator == null)
-            _bulletCoolddownOverlay.fillAmount = 0f;
-        else
         {
+            _bulletCoolddownOverlay.fillAmount = 0f;
+            return;
+        }
+
+        if (_bullet.CooldownProgress > 0)
             _bulletCoolddownOverlay.fillAmount = 1f - _bullet?.CooldownProgress ?? 0f;
+
+        if (_bulletCoolddownOverlay.color != _player.NextBulletColor) // change to event to swap color after bullet is fired
             _bulletCoolddownOverlay.color = _player.NextBulletColor;
-        }       
     }
 
     public void Destroy()
     {
         _player.ManaChanged -= OnManaChanged;
+        _player.HealthChanged -= OnHealthChanged;
+        GameHandler.instance.ScoreChanged -= OnScoreChanged;
         GameHandler.instance.UnSubscribe(this);
     }
 }

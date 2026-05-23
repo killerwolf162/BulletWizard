@@ -29,6 +29,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     public bool hasReachedThreshold;
     public bool inChaseRange;
     public bool inAttackRange;
+    private bool _alwaysChase = false;
 
     [Header("AI")]
     public Transform _player;
@@ -47,7 +48,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private int _spellCount = 5;
 
     public IReadOnlyList<Vector3> PatrolPoints => _spawner?.PatrolPoints;
-    public EnemyBehaviour(ElementalTypes type, AbstractSpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position)
+    public EnemyBehaviour(ElementalTypes type, AbstractSpawner spawner, GameObject gameobject, Transform Player, EnemyData data, Vector2 position, bool alwaysChase)
     {
         _player = Player;
         _elementType = type;
@@ -57,6 +58,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         _health = data.health;
         _score = data.score;
         _spawner = spawner;
+        _alwaysChase = alwaysChase;
         this.gameobject = gameobject;
         gameobject.transform.position = position;
 
@@ -65,7 +67,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public virtual void Start()
     {
-        GameHandler.instance.onPlayerDied += DisableAI;
+        GameHandler.instance.OnPlayerDied += DisableAI;
 
         GameObject bulletObject = Resources.Load("spooderBullet", typeof(GameObject)) as GameObject;
         if (_bulletPool._inactivePool == null)
@@ -140,14 +142,14 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             hasReachedThreshold = false;
             return;
         }
-            
 
         float distance = Vector3.Distance(gameobject.transform.position, _player.transform.position);
         bool canSee = distance <= chaseRange && HasLineOfSightToPlayer();
         bool canHear = distance <= soundRange;
 
         bool shouldChase = canSee || canHear;
-        inChaseRange = shouldChase;
+        inChaseRange = _alwaysChase || shouldChase;
+
         inAttackRange = distance <= attackRange && canSee;
         hasReachedThreshold = distance <= chaseThreshold;
     }
@@ -220,13 +222,13 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     {
         _spawner?.UnregisterEnemy(this);
         GameHandler.instance.UnSubscribe(this);
-        GameHandler.instance.onPlayerDied -= DisableAI;
+        GameHandler.instance.OnPlayerDied -= DisableAI;
 
         _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b.gameobject); });
 
         _bulletPool = null;
+        GameHandler.instance.ModifyScore(_score);
         GameHandler.instance.DestroyObject(gameobject);
-        GameHandler.instance.IncreaseScore(_score);
     }
 
     private void HandleProjectileHits()
@@ -255,9 +257,9 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
                         TakeDamage(bullet.damage);
                         bullet.Die();
                         return;
-                    }                    
-                    
-                    if(_elementType == ElementalTypes.Normal) // if normal spider always take normal bullet dmg
+                    }
+
+                    if (_elementType == ElementalTypes.Normal) // if normal spider always take normal bullet dmg
                     {
                         TakeDamage(bullet.damage);
                         bullet.Die();
