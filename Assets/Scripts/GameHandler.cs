@@ -31,11 +31,14 @@ public class GameHandler : MonoBehaviour
     [Header("Spawning")]
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private GameObject _enemySpawnerPrefab;
+    [SerializeField] private GameObject _staircasePrefab;
+    [SerializeField] private GameObject _pedestalPrefab;
     [SerializeField] private int _maxSpawners;
     [SerializeField] private int _maxAliveAtSameTime;
     [SerializeField] private int _entitiesToSpawn;
     private GameObject[] _enemySpawners;
     private List<Vector3>[] _spawnerPatrolPoints;
+    private int _playerRoomIdx;
 
     [Header("Player Data")]
     [SerializeField] private List<ElementData> _elementDatas = new List<ElementData>();
@@ -75,7 +78,8 @@ public class GameHandler : MonoBehaviour
         Pathfinder = new AStarPathfinder(_floorMap, _wallMap);
 
         cam = FindAnyObjectByType<Camera>();
-        SpawnPlayerAndSpawners();
+        SpawnEntities();
+        SpawnExitAndItems();
     }
 
     private void Update()
@@ -107,7 +111,7 @@ public class GameHandler : MonoBehaviour
         ScoreChanged?.Invoke(_score);
     }
 
-    private void SpawnPlayerAndSpawners()
+    private void SpawnEntities()
     {
         var roomCenters = _generator.RoomCenters;
         var roomFloors = _generator.RoomFloors;
@@ -118,68 +122,82 @@ public class GameHandler : MonoBehaviour
             return;
         }
 
-        // Spawn player in middle room
+        SpawnPlayer(roomCenters, roomFloors);
+        SpawnSpawners(roomCenters, roomFloors);
+    }
 
+    private void SpawnPlayer(IReadOnlyList<Vector2Int> roomCenters, IReadOnlyList<List<Vector2Int>> roomFloors)
+    {
+        // Find center room
         Vector2 avg = Vector2.zero;
-        foreach (var c in roomCenters)
-            avg += c;
+        foreach (var c in roomCenters) avg += c;
         avg /= roomCenters.Count;
 
-        int playerRoomIdx = 0;
+        // Set room idx
+        _playerRoomIdx = 0;
         float bestDist = float.MaxValue;
         for (int i = 0; i < roomCenters.Count; i++)
         {
             float d = (roomCenters[i] - avg).sqrMagnitude;
-            if (d < bestDist)
-            {
-                bestDist = d;
-                playerRoomIdx = i;
-            }
+            if (d < bestDist) { bestDist = d; _playerRoomIdx = i; }
         }
-        Vector2Int playerCell = GetAnyFloorInRoom(roomFloors[playerRoomIdx], roomCenters[playerRoomIdx]);
-        Vector3 playerWorld = FloorPosToWorld(playerCell);
-        GameObject playerGo = Instantiate(_playerPrefab, playerWorld, Quaternion.identity);
+
+        // Spawn player + HUD
+        Vector2Int cell = GetAnyFloorInRoom(roomFloors[_playerRoomIdx], roomCenters[_playerRoomIdx]);
+        GameObject playerGo = Instantiate(_playerPrefab, FloorPosToWorld(cell), Quaternion.identity);
         _player = new PlayerController(playerGo, _elementDatas);
+        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, _player, _player.FireballAbility, _player.ShootBulletAbility);
+    }
 
-        // Spawn spawners
-
-        // Collect all non-player rooms
-        List<int> roomIdcs = new List<int>();
+    private void SpawnSpawners(IReadOnlyList<Vector2Int> roomCenters, IReadOnlyList<List<Vector2Int>> roomFloors)
+    {
+        // Every room except the player room
+        var spawnRoomIndices = new List<int>();
         for (int i = 0; i < roomCenters.Count; i++)
         {
-            if (i == playerRoomIdx)
-                continue;
-            roomIdcs.Add(i);
+            if (i != _playerRoomIdx) spawnRoomIndices.Add(i);
         }
 
-        _enemySpawners = new GameObject[roomIdcs.Count];
-        _spawnerPatrolPoints = new List<Vector3>[roomIdcs.Count];
+        _enemySpawners = new GameObject[spawnRoomIndices.Count];
+        _spawnerPatrolPoints = new List<Vector3>[spawnRoomIndices.Count];
 
-        // prep spawnerGOs
-        for (int r = 0; r < roomIdcs.Count; r++)
+        for (int r = 0; r < spawnRoomIndices.Count; r++)
         {
-            int roomIdx = roomIdcs[r];
+            int roomIdx = spawnRoomIndices[r];
             var roomFloorCells = roomFloors[roomIdx];
 
-            List<Vector3> patrolPoints = new List<Vector3>();
+            var patrolPoints = new List<Vector3>(roomFloorCells?.Count ?? 0);
             if (roomFloorCells != null)
-            {
-                for (int i = 0; i < roomFloorCells.Count; i++)
-                {
-                    patrolPoints.Add(FloorPosToWorld(roomFloorCells[i]));
-                }
-            }
+                foreach (var cell in roomFloorCells)
+                    patrolPoints.Add(FloorPosToWorld(cell));
 
-            Vector2Int spawnerCell = GetAnyFloorInRoom(roomFloors[roomIdx], roomCenters[roomIdx]);
-            Vector3 spawnerWorld = FloorPosToWorld(spawnerCell);
+            Vector2Int spawnerCell = GetAnyFloorInRoom(roomFloorCells, roomCenters[roomIdx]);
+            GameObject spawnerGO = Instantiate(_enemySpawnerPrefab, FloorPosToWorld(spawnerCell),
+                                                 Quaternion.identity);
 
-            GameObject spawnerGO = Instantiate(_enemySpawnerPrefab, spawnerWorld, Quaternion.identity);
             _enemySpawners[r] = spawnerGO;
             _spawnerPatrolPoints[r] = patrolPoints;
         }
         SpawnSpooderSpawner();
+    }
 
-        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, _player, _player.FireballAbility, _player.ShootBulletAbility);
+    private void SpawnExitAndItems()
+    {
+        var secretRooms = _generator.SecretRooms;
+
+        if(secretRooms.Count >0)
+        {
+            SecretRoom exitRoom = secretRooms[0];
+            Vector3 stairWorldPos = FloorPosToWorld(exitRoom.Center);
+            Instantiate(_staircasePrefab, stairWorldPos, Quaternion.identity);
+
+            for (int i = 1; i < secretRooms.Count; i++)
+            {
+                SecretRoom itemRoom = secretRooms[i];
+                Vector3 pedestalWorldPos = FloorPosToWorld(itemRoom.Center);
+                Instantiate(_pedestalPrefab, pedestalWorldPos, Quaternion.identity);
+            }
+        }
     }
 
     // Picks a random floor tile from the room, or falls back to the room center if empty.

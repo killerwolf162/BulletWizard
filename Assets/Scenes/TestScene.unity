@@ -156,6 +156,8 @@ MonoBehaviour:
   _dungeonParameters: {fileID: 11400000, guid: e18d2333f6cabe34b8409c20bc678477, type: 2}
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
+  _staircasePrefab: {fileID: 865149010975879588, guid: 8415749f6f5df21428984a06cbf4614c, type: 3}
+  _pedestalPrefab: {fileID: 865149010975879588, guid: ad5d32532a971994c869e51c305318c1, type: 3}
   _maxSpawners: 10
   _maxAliveAtSameTime: 2
   _entitiesToSpawn: 2
