@@ -148,20 +148,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fd9dea866c4e13546bc9e29d6bf60a10, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  floorMap: {fileID: 1354921044}
-  wallMap: {fileID: 1354921043}
-  walkData: {fileID: 11400000, guid: 207603a4e43580d4bb2374654ad12826, type: 2}
-  wallParameters: {fileID: 11400000, guid: eeb7f0df826f6f64f81db7abce3fa75f, type: 2}
-  secretRoomParameters: {fileID: 11400000, guid: d667981c416f8564c9630d97a21d2b90, type: 2}
-  dungeonParameters: {fileID: 11400000, guid: 91d196aa0c71f384fab92b949011b3a5, type: 2}
+  _floorMap: {fileID: 1354921044}
+  _wallMap: {fileID: 1354921043}
+  _walkData: {fileID: 11400000, guid: 679bd074aa950fc408b43f28df865b07, type: 2}
+  _wallParameters: {fileID: 11400000, guid: eeb7f0df826f6f64f81db7abce3fa75f, type: 2}
+  _secretRoomParameters: {fileID: 11400000, guid: 35d012c9f67a6194281d6e38569dc03d, type: 2}
+  _dungeonParameters: {fileID: 11400000, guid: e18d2333f6cabe34b8409c20bc678477, type: 2}
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
   _maxSpawners: 10
+  _maxAliveAtSameTime: 2
+  _entitiesToSpawn: 2
   _elementDatas:
   - {fileID: 11400000, guid: e86a033e775c7764897025834f90dab5, type: 2}
   - {fileID: 11400000, guid: 22fe5509f55418846b76cf2bb50b18df, type: 2}
   - {fileID: 11400000, guid: 689ea6a4976de93428dbee6c721a96dd, type: 2}
   - {fileID: 11400000, guid: 03558473db04a8b4a8477e1846d12cd1, type: 2}
+  _alwaysChase: 0
   _spooderData:
   - {fileID: 11400000, guid: 1cdc085b573d03347af41915a344dd9c, type: 2}
   - {fileID: 11400000, guid: a79d4ab541003f541903c869aff65650, type: 2}

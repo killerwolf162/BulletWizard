@@ -12,12 +12,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6786e4f6f4258f4a8dcbac8ab33c51c, type: 3}
   m_Name: SmallDungeon
   m_EditorClassIdentifier: 
-  _minRoomWidth: 4
-  _minRoomHeight: 5
-  _minRoomCount: 5
-  _dungeonWidth: 30
-  _dungeonHeight: 30
-  _randomWalkRooms: 0
-  _offset: 1
-  _mediumCorridorPercent: 0.25
-  _largeCorridorPercent: 0.125
+  minRoomWidth: 3
+  minRoomHeight: 3
+  minRoomCount: 4
+  maxRoomCount: 10
+  maxRoomHeight: 5
+  maxRoomWidth: 5
+  dungeonWidth: 20
+  dungeonHeight: 20
+  randomWalkRooms: 1
+  offset: 1
+  mediumCorridorPercent: 0
+  largeCorridorPercent: 0

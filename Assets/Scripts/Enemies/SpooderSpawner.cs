@@ -12,12 +12,14 @@ public class SpooderSpawner : AbstractSpawner
 
     private Transform _spawnPos;
     private Transform _playerPos;
-    private int _maxSpooders = 2;
+    private int _maxSpoodersAlive = 2;
+    private int _spoodersToSpawn = 10;
     private bool _alwaysChase;
+    private bool _alwaysSpawn;
 
     public override IReadOnlyList<Vector3> PatrolPoints => _patrolPoints;
     private List<Vector3> _patrolPoints;
-    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, List<EnemyData> data, List<Vector3> patrolPoints, bool alwaysChase)
+    public SpooderSpawner(GameObject spawner, GameObject[] prefabs, Transform spawnPos, Transform playerPos, List<EnemyData> data, List<Vector3> patrolPoints, int maxEntitiesAlive, int entitiesToSpawn, bool alwaysChase = false, bool alwaysSpawn = false)
     {
         this.gameobject = spawner;
         _prefabs = prefabs;
@@ -25,8 +27,10 @@ public class SpooderSpawner : AbstractSpawner
         _playerPos = playerPos;
         _enemyData.AddRange(data);
         _patrolPoints = patrolPoints;
+        _maxSpoodersAlive = maxEntitiesAlive;
+        _spoodersToSpawn = entitiesToSpawn;
         _alwaysChase = alwaysChase;
-
+        _alwaysSpawn = alwaysSpawn;
         Start();
     }
 
@@ -44,19 +48,23 @@ public class SpooderSpawner : AbstractSpawner
 
     public override void PrepareToSpawn()
     {
-        if(OwnedEnemies.Count < _maxSpooders)
+        if(OwnedEnemies.Count < _maxSpoodersAlive)
         {
-            int type = 0;
-            var RNG = Random.Range(0, 100);
+            if(_spoodersToSpawn > 0 || _alwaysSpawn)
+            {
+                int type = 0;
+                var RNG = Random.Range(0, 100);
 
-            if (RNG < 50)
-                type = (int)ElementalTypes.Normal;            
-            else if (RNG > 50 && RNG < 75)
-                type = (int)ElementalTypes.Fire;
-            else if (RNG > 75)
-                type = (int)ElementalTypes.Ice;
+                if (RNG < 50)
+                    type = (int)ElementalTypes.Normal;
+                else if (RNG > 50 && RNG < 75)
+                    type = (int)ElementalTypes.Fire;
+                else if (RNG > 75)
+                    type = (int)ElementalTypes.Ice;
 
-            Spawn(type);
+                Spawn(type);
+                _spoodersToSpawn -= 1;
+            }            
         }       
     }
 
@@ -69,7 +77,7 @@ public class SpooderSpawner : AbstractSpawner
         else
             enemyData = _enemyData[1];
 
-        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, enemyData, _spawnPos.position, _alwaysChase);
+        EnemyBehaviour enemy = new EnemyBehaviour((ElementalTypes)type, this, newEnemyGo, _playerPos, enemyData, _spawnPos.position, _alwaysChase);       
         RegisterEnemy(enemy);
     }
 } 

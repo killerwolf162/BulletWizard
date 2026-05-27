@@ -9,6 +9,7 @@ public class SecretRoomParameters : ScriptableObject
 
     [Range(0, 1f)] public float chancePerDmgedWall = 0.05f;
     [Min(1)] public int maxCount = 1;
+    [Min(1)] public int minCount = 1;
     [Min(2)] public int minWidth = 4;
     [Min(2)] public int minHeight = 4;
     [Min(2)] public int maxWidth = 8;
@@ -28,6 +29,7 @@ public class SecretRoomParameters : ScriptableObject
         maxWidth = Mathf.Max(minWidth, maxWidth);
         maxHeight = Mathf.Max(minHeight, maxHeight);
         maxCount = Mathf.Max(0, maxCount);
+        minCount = Mathf.Max(0, minCount);
 
         corridorMinLength = Mathf.Max(1, corridorMinLength);
         corridorMaxLength = Mathf.Max(corridorMinLength, corridorMaxLength);

@@ -36,7 +36,7 @@ public class CorridorFirstGenerator : SimpleRandomWalkDungeonGenerator
         IncreaseCorridors(_corridors, _floorPositions, mediumCorridorPercent, largeCorridorPercent);
 
         tilemapVisualizer.PaintFloorTiles(_floorPositions);
-        WallGenerator.CreateWalls(_floorPositions, tilemapVisualizer, wallGeneratorParameters, secertRoomParameters);
+        WallGenerator.CreateWalls(_floorPositions, tilemapVisualizer, wallGeneratorParameters);
     }
 
     private List<List<Vector2Int>> CreateCorridors(HashSet<Vector2Int> _floorPositions, HashSet<Vector2Int> _potRoomPositions)

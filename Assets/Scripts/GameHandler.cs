@@ -13,17 +13,17 @@ public class GameHandler : MonoBehaviour
     public event Action<int> ScoreChanged;
 
     [Header("Tilemaps")]
-    [SerializeField] private Tilemap floorMap;
-    [SerializeField] private Tilemap wallMap;
-    public Tilemap FloorMap => floorMap;
-    public Tilemap WallMap => wallMap;
+    [SerializeField] private Tilemap _floorMap;
+    [SerializeField] private Tilemap _wallMap;
+    public Tilemap FloorMap => _floorMap;
+    public Tilemap WallMap => _wallMap;
     public AStarPathfinder Pathfinder { get; private set; }
 
     [Header("DungeonGeneration")]
-    [SerializeField] private SimpleRandomWalkData walkData;
-    [SerializeField] private WallGenerationParameters wallParameters;
-    [SerializeField] private SecretRoomParameters secretRoomParameters;
-    [SerializeField] private DungeonData dungeonParameters;
+    [SerializeField] private SimpleRandomWalkData _walkData;
+    [SerializeField] private WallGenerationParameters _wallParameters;
+    [SerializeField] private SecretRoomParameters _secretRoomParameters;
+    [SerializeField] private DungeonData _dungeonParameters;
 
     private TilemapVisualizer _tilemapVisualizer;
     private RoomFirstDungeonGenerator _generator;
@@ -32,6 +32,8 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private GameObject _enemySpawnerPrefab;
     [SerializeField] private int _maxSpawners;
+    [SerializeField] private int _maxAliveAtSameTime;
+    [SerializeField] private int _entitiesToSpawn;
     private GameObject[] _enemySpawners;
     private List<Vector3>[] _spawnerPatrolPoints;
 
@@ -55,7 +57,6 @@ public class GameHandler : MonoBehaviour
     private PlayerController _player;
     private List<IUpdateable> _updateables = new List<IUpdateable>();
     private PlayerHUD _hud;
-    public int Score => _score;
     private int _score;
 
     void Awake()
@@ -67,11 +68,11 @@ public class GameHandler : MonoBehaviour
     private void Start()
     {
         instance = this;
-        _tilemapVisualizer = new TilemapVisualizer(floorMap, wallMap);
-        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, walkData, dungeonParameters, wallParameters, secretRoomParameters);
+        _tilemapVisualizer = new TilemapVisualizer(_floorMap, _wallMap);
+        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, _walkData, _dungeonParameters, _wallParameters, _secretRoomParameters);
         _generator.GenerateDungeon();
 
-        Pathfinder = new AStarPathfinder(floorMap, wallMap);
+        Pathfinder = new AStarPathfinder(_floorMap, _wallMap);
 
         cam = FindAnyObjectByType<Camera>();
         SpawnPlayerAndSpawners();
@@ -117,7 +118,7 @@ public class GameHandler : MonoBehaviour
             return;
         }
 
-        // Spawn player in middle room //
+        // Spawn player in middle room
 
         Vector2 avg = Vector2.zero;
         foreach (var c in roomCenters)
@@ -137,12 +138,12 @@ public class GameHandler : MonoBehaviour
         }
         Vector2Int playerCell = GetAnyFloorInRoom(roomFloors[playerRoomIdx], roomCenters[playerRoomIdx]);
         Vector3 playerWorld = FloorPosToWorld(playerCell);
-
         GameObject playerGo = Instantiate(_playerPrefab, playerWorld, Quaternion.identity);
         _player = new PlayerController(playerGo, _elementDatas);
 
-        // Spawn spawners //
+        // Spawn spawners
 
+        // Collect all non-player rooms
         List<int> roomIdcs = new List<int>();
         for (int i = 0; i < roomCenters.Count; i++)
         {
@@ -151,23 +152,13 @@ public class GameHandler : MonoBehaviour
             roomIdcs.Add(i);
         }
 
-        //shuffle spawner rooms
-        for (int i = roomIdcs.Count - 1; i > 0; i--)
-        {
-            int j = UnityEngine.Random.Range(0, i + 1);
-            int temp = roomIdcs[i];
-            roomIdcs[i] = roomIdcs[j];
-            roomIdcs[j] = temp;
-        }
-
-        int spawnerCount = Mathf.Min(_maxSpawners, roomIdcs.Count);
-        _enemySpawners = new GameObject[spawnerCount];
-        _spawnerPatrolPoints = new List<Vector3>[spawnerCount];
+        _enemySpawners = new GameObject[roomIdcs.Count];
+        _spawnerPatrolPoints = new List<Vector3>[roomIdcs.Count];
 
         // prep spawnerGOs
-        for (int s = 0; s < spawnerCount; s++)
+        for (int r = 0; r < roomIdcs.Count; r++)
         {
-            int roomIdx = roomIdcs[s];
+            int roomIdx = roomIdcs[r];
             var roomFloorCells = roomFloors[roomIdx];
 
             List<Vector3> patrolPoints = new List<Vector3>();
@@ -183,8 +174,8 @@ public class GameHandler : MonoBehaviour
             Vector3 spawnerWorld = FloorPosToWorld(spawnerCell);
 
             GameObject spawnerGO = Instantiate(_enemySpawnerPrefab, spawnerWorld, Quaternion.identity);
-            _enemySpawners[s] = spawnerGO;
-            _spawnerPatrolPoints[s] = patrolPoints;
+            _enemySpawners[r] = spawnerGO;
+            _spawnerPatrolPoints[r] = patrolPoints;
         }
         SpawnSpooderSpawner();
 
@@ -205,7 +196,6 @@ public class GameHandler : MonoBehaviour
     // Converts dungeon grid coords (Vector2Int) to a world position.
     private Vector3 FloorPosToWorld(Vector2Int pos)
     {
-        // If the player appears off-center, add +0.5f offsets:
         return new Vector3(pos.x + 0.5f, pos.y + 0.5f, 0f);
     }
 
@@ -216,7 +206,7 @@ public class GameHandler : MonoBehaviour
             GameObject spawner = _enemySpawners[i];
             List<Vector3> patrolPoints = _spawnerPatrolPoints[i];
 
-            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints, _alwaysChase);
+            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints, _maxAliveAtSameTime, _entitiesToSpawn);
         }
     }
 
