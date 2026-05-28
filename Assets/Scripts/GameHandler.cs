@@ -32,7 +32,8 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private GameObject _playerPrefab;
     [SerializeField] private GameObject _enemySpawnerPrefab;
     [SerializeField] private GameObject _staircasePrefab;
-    [SerializeField] private GameObject _pedestalPrefab;
+    [SerializeField] private GameObject _itemChestPrefab;
+    [SerializeField] private GameObject _openedItemChestPrefab;
     [SerializeField] private int _maxSpawners;
     [SerializeField] private int _maxAliveAtSameTime;
     [SerializeField] private int _entitiesToSpawn;
@@ -79,6 +80,7 @@ public class GameHandler : MonoBehaviour
 
         cam = FindAnyObjectByType<Camera>();
         SpawnEntities();
+        ItemPool.Initialize();
         SpawnExitAndItems();
     }
 
@@ -185,17 +187,20 @@ public class GameHandler : MonoBehaviour
     {
         var secretRooms = _generator.SecretRooms;
 
-        if(secretRooms.Count >0)
+        if (secretRooms.Count > 0)
         {
             SecretRoom exitRoom = secretRooms[0];
             Vector3 stairWorldPos = FloorPosToWorld(exitRoom.Center);
-            Instantiate(_staircasePrefab, stairWorldPos, Quaternion.identity);
+            var staircaseGo = Instantiate(_staircasePrefab, stairWorldPos, Quaternion.identity);
+            var staircase = new StairCase(staircaseGo);
 
             for (int i = 1; i < secretRooms.Count; i++)
             {
                 SecretRoom itemRoom = secretRooms[i];
-                Vector3 pedestalWorldPos = FloorPosToWorld(itemRoom.Center);
-                Instantiate(_pedestalPrefab, pedestalWorldPos, Quaternion.identity);
+                Vector3 chestWorldPos = FloorPosToWorld(itemRoom.Center);
+                var chestGO = Instantiate(_itemChestPrefab, chestWorldPos, Quaternion.identity);
+                var itemChest = new ItemChest(chestGO);
+                itemChest.ChestOpened += OnChestOpened;
             }
         }
     }
@@ -224,7 +229,7 @@ public class GameHandler : MonoBehaviour
             GameObject spawner = _enemySpawners[i];
             List<Vector3> patrolPoints = _spawnerPatrolPoints[i];
 
-            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player.gameobject.transform, _spooderData, patrolPoints, _maxAliveAtSameTime, _entitiesToSpawn);
+            var spawnerGO = new SpooderSpawner(spawner, _spooderGos, spawner.transform, _player._gameObject.transform, _spooderData, patrolPoints, _maxAliveAtSameTime, _entitiesToSpawn);
         }
     }
 
@@ -232,6 +237,14 @@ public class GameHandler : MonoBehaviour
     {
         Debug.Log("PlayerDied");
         OnPlayerDied?.Invoke();
+    }
+
+    public void OnChestOpened(ItemChest chest)
+    {
+        Vector3 position = chest._gameObject.transform.position;
+
+        Destroy(chest._gameObject);
+        Instantiate(_openedItemChestPrefab, position, Quaternion.identity);
     }
 
     public GameObject InstantiateNew(GameObject gameObject)

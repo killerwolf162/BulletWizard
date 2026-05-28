@@ -16,7 +16,7 @@ public class Bullet : IBullet, ISceneObject
 
     public event Action<Bullet> OnDie;
 
-    public GameObject gameobject => bullet;
+    public GameObject _gameObject => bullet;
     public GameObject bullet;
 
     private IShooter _shooter;

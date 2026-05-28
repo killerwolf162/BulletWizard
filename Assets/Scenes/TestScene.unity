@@ -157,10 +157,11 @@ MonoBehaviour:
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
   _staircasePrefab: {fileID: 865149010975879588, guid: 8415749f6f5df21428984a06cbf4614c, type: 3}
-  _pedestalPrefab: {fileID: 865149010975879588, guid: ad5d32532a971994c869e51c305318c1, type: 3}
+  _itemChestPrefab: {fileID: 865149010975879588, guid: ad5d32532a971994c869e51c305318c1, type: 3}
+  _openedItemChestPrefab: {fileID: 865149010975879588, guid: 281def0af3e9f0645977119019a88063, type: 3}
   _maxSpawners: 10
   _maxAliveAtSameTime: 2
-  _entitiesToSpawn: 2
+  _entitiesToSpawn: 0
   _elementDatas:
   - {fileID: 11400000, guid: e86a033e775c7764897025834f90dab5, type: 2}
   - {fileID: 11400000, guid: 22fe5509f55418846b76cf2bb50b18df, type: 2}

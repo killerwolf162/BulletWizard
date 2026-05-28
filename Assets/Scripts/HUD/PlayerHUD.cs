@@ -36,6 +36,8 @@ public class PlayerHUD : IUpdateable
     {        
         _player.HealthChanged += OnHealthChanged;
         _player.ManaChanged += OnManaChanged;
+        _player.MaxHealthChanged += OnMaxHealthChanged;
+        _player.MaxManaChanged += OnMaxManaChanged;
         GameHandler.instance.ScoreChanged += OnScoreChanged;
     }
 
@@ -47,6 +49,16 @@ public class PlayerHUD : IUpdateable
     private void OnHealthChanged(int newValue)
     {
         _healthSlider.value = newValue;
+    }
+
+    private void OnMaxManaChanged(int newValue)
+    {
+        _manaSlider.maxValue = newValue;
+    }
+
+    private void OnMaxHealthChanged(int newValue)
+    {
+        _healthSlider.maxValue = newValue;
     }
 
     private void OnScoreChanged(int newValue)

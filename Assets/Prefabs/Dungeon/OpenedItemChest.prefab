@@ -12,8 +12,8 @@ GameObject:
   - component: {fileID: 6488550545414430648}
   - component: {fileID: 3510331372290253002}
   m_Layer: 0
-  m_Name: Staircase
-  m_TagString: Staircase
+  m_Name: OpenedItemChest
+  m_TagString: ItemChest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -77,7 +77,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 646fb10d9f4d53048bd2116ba8e1e13e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 870f3274570eabb408f0178f416e65f0, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -126,7 +126,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.64, y: 0.64}
+    oldSize: {x: 0.32, y: 0.32}
     newSize: {x: 0.32, y: 0.32}
     adaptiveTilingThreshold: 0.5
     drawMode: 0

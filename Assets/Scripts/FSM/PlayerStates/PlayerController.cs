@@ -8,6 +8,8 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public event Action<int> ManaChanged;
     public event Action<int> HealthChanged;
+    public event Action<int> MaxHealthChanged;
+    public event Action<int> MaxManaChanged;
 
     public Rigidbody2D rb;
     public Collider2D col;
@@ -19,7 +21,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public PlayerMove moveState { get; private set; } = new PlayerMove();
 
     [Header("Player things")]
-    public GameObject gameobject { get; private set; }
+    public GameObject _gameObject { get; private set; }
     public BulletDecorator activeDecorator { get; set; }
     public FireballAbility FireballAbility { get; private set; }
     public ShootBulletAbility ShootBulletAbility { get; private set; }
@@ -31,6 +33,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private ElementData _fireData;
     private ElementData _iceData;
     private ElementData _airData;
+
 
 
     [Header("Gameplay variables")]
@@ -56,11 +59,13 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     [Header("Misc")]
     public Color NextBulletColor => activeDecorator?.Color ?? Color.black;
-    private Vector3 _mousePos;
+    public ItemChest chestInRange { get; private set; }
+    public StairCase staircaseInRange { get; private set; }
+    private Vector3 _mousePos;   
 
     public PlayerController(GameObject gameobject, List<ElementData> elementList)
     {
-        this.gameobject = gameobject;
+        this._gameObject = gameobject;
         rb = gameobject.GetComponent<Rigidbody2D>();
         col = gameobject.GetComponent<Collider2D>();
 
@@ -115,18 +120,17 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         //_inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, new DashAbility(this));
         _inputHandler.BindKeyToCommand(KeyCode.Space, KeypressType.Down, FireballAbility = new FireballAbility(this));
         _inputHandler.BindKeyToCommand(KeyCode.Mouse0, KeypressType.Down, ShootBulletAbility = new ShootBulletAbility(_bulletPool, this));
+        _inputHandler.BindKeyToCommand(KeyCode.E, KeypressType.Down, new InteractCommand(this));
         _inputHandler.BindKeyToCommand(KeyCode.Alpha1, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_basicElement.type, _basicElement.elementalDmg, _basicElement.elementColor, _basicElement.bulletSpeed)));
         _inputHandler.BindKeyToCommand(KeyCode.Alpha2, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_fireData.type, _fireData.elementalDmg, _fireData.elementColor, _fireData.bulletSpeed)));
-        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_iceData.type, _iceData.elementalDmg, _iceData.elementColor, _iceData.bulletSpeed)));
-
-        
+        _inputHandler.BindKeyToCommand(KeyCode.Alpha3, KeypressType.Down, new SetDecoratorCommand(this, new ElementDecorator(_iceData.type, _iceData.elementalDmg, _iceData.elementColor, _iceData.bulletSpeed)));      
     }
 
     public virtual void Update()
     {
         _inputHandler.HandleInput();
 
-        Vector3 previousPos = gameobject.transform.position;
+        Vector3 previousPos = _gameObject.transform.position;
 
         // Mana regen Tick
         if(_mana < _maxMana)
@@ -141,8 +145,21 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
         //update loop statemachine
         stateMachine?.Update();
-        if (col != null) HandleEnemyBulletHits();
+        if (col != null) HandleCollision();
         SetCameraPosition();
+    }
+
+    public void IncreaseMaxHP(int amount)
+    {
+        _maxHealth += amount;
+        MaxHealthChanged?.Invoke(_maxHealth);
+        ModifyHealth(amount);
+    }
+
+    public void IncreaseMaxMana(int amount)
+    {
+        _maxMana += amount;
+        MaxManaChanged?.Invoke(_maxMana);
     }
 
     public void ModifyHealth(int amount)
@@ -163,9 +180,9 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     private void Die()
     {
         GameHandler.instance.UnSubscribe(this);
-        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b.gameobject); });
+        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b._gameObject); });
         GameHandler.instance.PlayerDied();
-        GameHandler.instance.DestroyObject(gameobject);
+        GameHandler.instance.DestroyObject(_gameObject);
     }
 
 
@@ -176,7 +193,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public GameObject GameObject()
     {
-        return gameobject;
+        return _gameObject;
     }
 
     public Bullet CreateBullet(GameObject bulletObject)
@@ -188,7 +205,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public Vector2 GetAimDirection()
     {
         _mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        var directionToGive = _mousePos - gameobject.transform.position;
+        var directionToGive = _mousePos - _gameObject.transform.position;
 
         return directionToGive;
     }
@@ -196,7 +213,7 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
     public Quaternion GetBulletRotation()
     {
         _mousePos = _cam.ScreenToWorldPoint(Input.mousePosition);
-        Vector3 rotation = _mousePos - gameobject.transform.position;
+        Vector3 rotation = _mousePos - _gameObject.transform.position;
         float zRotation = Mathf.Atan2(rotation.y, rotation.x) * Mathf.Rad2Deg;
 
         return Quaternion.Euler(0, 0, zRotation - 90);
@@ -210,10 +227,10 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
 
     public void SetCameraPosition()
     {
-        GameHandler.instance.cam.transform.position = gameobject.transform.position + new Vector3(0, 0, -10);
+        GameHandler.instance.cam.transform.position = _gameObject.transform.position + new Vector3(0, 0, -10);
     }
 
-    private void HandleEnemyBulletHits()
+    private void HandleCollision()
     {
         var overlappingColliders = new List<Collider2D>();
         var filter = new ContactFilter2D
@@ -221,7 +238,14 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
             useTriggers = true
         };
         col.Overlap(filter, overlappingColliders);
-        foreach (var otherCollider in overlappingColliders)
+
+        HandleBulletCollision(overlappingColliders);
+        HandleItemCollision(overlappingColliders);
+    }
+
+    private void HandleBulletCollision(List<Collider2D> colliders)
+    {
+        foreach (var otherCollider in colliders)
         {
             if (otherCollider.CompareTag("EnemyBullet"))
             {
@@ -232,5 +256,28 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
                 }
             }
         }
+    }
+
+    public void HandleItemCollision(List<Collider2D> colliders)
+    {
+        ItemChest foundChest = null;
+        StairCase foundStaircase = null;
+
+        foreach (var otherCollider in colliders)
+        {
+            if (otherCollider.CompareTag("Staircase"))
+            {
+                if (StairCase.collLookup.TryGetValue(otherCollider, out var staircase))
+                    foundStaircase = staircase;
+            }
+            if (otherCollider.CompareTag("ItemChest"))
+            {
+                if (ItemChest.collLookup.TryGetValue(otherCollider, out var chest))
+                    foundChest = chest;
+            }
+        }
+
+        chestInRange = foundChest;
+        staircaseInRange = foundStaircase;
     }
 }

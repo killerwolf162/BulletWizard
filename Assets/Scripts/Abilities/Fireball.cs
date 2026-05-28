@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class Fireball : ISceneObject
 {
-    public GameObject gameobject { get; private set; }
+    public GameObject _gameObject { get; private set; }
 
     private Vector2 _startPosition;
     private Vector2 _direction;
@@ -19,8 +19,8 @@ public class Fireball : ISceneObject
     public void Start()
     {
         GameObject fireballObject = Resources.Load("Fireball", typeof(GameObject)) as GameObject;
-        gameobject = GameHandler.instance.InstantiateNew(fireballObject);
-        gameobject.transform.position = _startPosition;
+        _gameObject = GameHandler.instance.InstantiateNew(fireballObject);
+        _gameObject.transform.position = _startPosition;
         GameHandler.instance.Subscribe(this);
     }
 
@@ -31,11 +31,11 @@ public class Fireball : ISceneObject
 
         if (_aliveTime < 0)
         {
-            GameHandler.instance.DestroyObject(gameobject);
+            GameHandler.instance.DestroyObject(_gameObject);
             GameHandler.instance.UnSubscribe(this);
         }
 
         //move fireball
-        gameobject.transform.position += (Vector3)_direction * Time.deltaTime;
+        _gameObject.transform.position += (Vector3)_direction * Time.deltaTime;
     }
 }

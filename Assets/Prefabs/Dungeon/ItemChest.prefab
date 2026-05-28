@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3510331372290253002}
   m_Layer: 0
   m_Name: ItemChest
-  m_TagString: Spawner
+  m_TagString: ItemChest
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

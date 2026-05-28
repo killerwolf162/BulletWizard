@@ -20,7 +20,7 @@ public class EnemyPatrol : AState<EnemyBehaviour>
 
     public override void Update(EnemyBehaviour runner)
     {
-        if (runner == null || runner.gameobject == null)
+        if (runner == null || runner._gameObject == null)
             return;
 
         base.Update(runner);
@@ -53,7 +53,7 @@ public class EnemyPatrol : AState<EnemyBehaviour>
             FollowPath(runner);
         }
 
-        if (Vector3.Distance(runner.gameobject.transform.position, _walkPoint) < 0.1f)
+        if (Vector3.Distance(runner._gameObject.transform.position, _walkPoint) < 0.1f)
         {
             onSwitch(runner.idleState);
         }
@@ -69,10 +69,10 @@ public class EnemyPatrol : AState<EnemyBehaviour>
 
     private void MoveDirectlyTowards(EnemyBehaviour runner, Vector3 target)
     {
-        Vector3 currentPos = runner.gameobject.transform.position;
+        Vector3 currentPos = runner._gameObject.transform.position;
         float speed = runner.Speed;
 
-        runner.gameobject.transform.position = Vector3.MoveTowards(currentPos, target, speed * Time.deltaTime);
+        runner._gameObject.transform.position = Vector3.MoveTowards(currentPos, target, speed * Time.deltaTime);
     }
 
     private void FollowPath(EnemyBehaviour runner)
@@ -87,17 +87,17 @@ public class EnemyPatrol : AState<EnemyBehaviour>
             }
         }
 
-        Vector3 currentPos = runner.gameobject.transform.position;
+        Vector3 currentPos = runner._gameObject.transform.position;
         float speed = runner.Speed;
 
         Vector3 waypoint = _currentPath[_currentWaypointIndex];
 
-        runner.gameobject.transform.position = Vector3.MoveTowards(
+        runner._gameObject.transform.position = Vector3.MoveTowards(
             currentPos,
             waypoint,
             speed * Time.deltaTime);
 
-        if (Vector3.Distance(runner.gameobject.transform.position, waypoint) < 0.05f)
+        if (Vector3.Distance(runner._gameObject.transform.position, waypoint) < 0.05f)
         {
             _currentWaypointIndex++;
 
@@ -117,7 +117,7 @@ public class EnemyPatrol : AState<EnemyBehaviour>
             return;
         }
 
-        _currentPath = GameHandler.instance.Pathfinder.FindPath(runner.gameobject.transform.position, _walkPoint);
+        _currentPath = GameHandler.instance.Pathfinder.FindPath(runner._gameObject.transform.position, _walkPoint);
 
         if (_currentPath != null && _currentPath.Count >= 2)
         {
@@ -143,10 +143,10 @@ public class EnemyPatrol : AState<EnemyBehaviour>
         int idx = Random.Range(0, patrolPoints.Count);
         _walkPoint = patrolPoints[idx];
 
-        if (Vector3.Distance(runner.gameobject.transform.position, _walkPoint) < 0.1f && patrolPoints.Count > 1)
+        if (Vector3.Distance(runner._gameObject.transform.position, _walkPoint) < 0.1f && patrolPoints.Count > 1)
         {
             int safety = 0;
-            while (Vector3.Distance(runner.gameobject.transform.position, _walkPoint) < 0.1f && safety < 5)
+            while (Vector3.Distance(runner._gameObject.transform.position, _walkPoint) < 0.1f && safety < 5)
             {
                 idx = Random.Range(0, patrolPoints.Count);
                 _walkPoint = patrolPoints[idx];

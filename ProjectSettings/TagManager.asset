@@ -9,6 +9,8 @@ TagManager:
   - Bullet
   - EnemyBullet
   - Spawner
+  - ItemChest
+  - Staircase
   layers:
   - Default
   - TransparentFX

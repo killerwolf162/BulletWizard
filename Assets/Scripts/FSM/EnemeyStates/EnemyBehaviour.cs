@@ -8,7 +8,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     private Rigidbody2D rb;
     private Collider2D col;
     private AbstractSpawner _spawner;
-    public GameObject gameobject { get; private set; }
+    public GameObject _gameObject { get; private set; }
     private ElementalTypes _elementType;
 
     [Header("StateMachine")]
@@ -59,7 +59,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         _score = data.score;
         _spawner = spawner;
         _alwaysChase = alwaysChase;
-        this.gameobject = gameobject;
+        this._gameObject = gameobject;
         gameobject.transform.position = position;
 
         Start();
@@ -88,8 +88,8 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             _bulletPool._inactivePool.Add(bullet);
         }
 
-        rb = gameobject.GetComponent<Rigidbody2D>();
-        col = gameobject.GetComponent<Collider2D>();
+        rb = _gameObject.GetComponent<Rigidbody2D>();
+        col = _gameObject.GetComponent<Collider2D>();
 
         GameHandler.instance.Subscribe(this);
 
@@ -106,12 +106,12 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public virtual void Update()
     {
-        if (gameobject == null)
+        if (_gameObject == null)
         {
             GameHandler.instance.UnSubscribe(this);
         }
 
-        Vector3 previousPos = gameobject.transform.position;
+        Vector3 previousPos = _gameObject.transform.position;
 
         //update loop statemachine.
         CheckPlayerInRange();
@@ -135,7 +135,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     //check if the enemy gives chase or attacks
     public void CheckPlayerInRange()
     {
-        if (gameobject == null || _player == null)
+        if (_gameObject == null || _player == null)
         {
             inChaseRange = false;
             inAttackRange = false;
@@ -143,7 +143,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
             return;
         }
 
-        float distance = Vector3.Distance(gameobject.transform.position, _player.transform.position);
+        float distance = Vector3.Distance(_gameObject.transform.position, _player.transform.position);
         bool canSee = distance <= chaseRange && HasLineOfSightToPlayer();
         bool canHear = distance <= soundRange;
 
@@ -156,7 +156,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     private bool HasLineOfSightToPlayer()
     {
-        Vector3 origin = gameobject.transform.position;
+        Vector3 origin = _gameObject.transform.position;
         Vector3 target = _player.position;
         Vector3 dir = target - origin;
         float distance = dir.magnitude;
@@ -180,13 +180,13 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
 
     public GameObject GameObject()
     {
-        return gameobject;
+        return _gameObject;
     }
 
     public Bullet CreateBullet(GameObject bulletObject)
     {
         Bullet bullet = new Bullet(bulletObject, this, _damage, bulletObject.GetComponent<SpriteRenderer>().color, 5);
-        bullet.gameobject.name = "SpiderBullet";
+        bullet._gameObject.name = "SpiderBullet";
         return bullet;
     }
 
@@ -204,7 +204,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     public Vector2 GetAimDirection()
     {
         var playerPos = _player.transform.position;
-        var directionToGive = playerPos - gameobject.transform.position;
+        var directionToGive = playerPos - _gameObject.transform.position;
 
         return directionToGive;
     }
@@ -212,7 +212,7 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
     public Quaternion GetBulletRotation()
     {
         var playerPos = _player.transform.position;
-        Vector3 rotation = playerPos - gameobject.transform.position;
+        Vector3 rotation = playerPos - _gameObject.transform.position;
         float zRotation = Mathf.Atan2(rotation.y, rotation.x) * Mathf.Rad2Deg;
 
         return Quaternion.Euler(0, 0, zRotation - 90);
@@ -224,11 +224,11 @@ public class EnemyBehaviour : IStateRunner, ISceneObject, IShooter
         GameHandler.instance.UnSubscribe(this);
         GameHandler.instance.OnPlayerDied -= DisableAI;
 
-        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b.gameobject); });
+        _bulletPool?.DestroyAll(b => { GameHandler.instance.DestroyObject(b._gameObject); });
 
         _bulletPool = null;
         GameHandler.instance.ModifyScore(_score);
-        GameHandler.instance.DestroyObject(gameobject);
+        GameHandler.instance.DestroyObject(_gameObject);
     }
 
     private void HandleProjectileHits()
