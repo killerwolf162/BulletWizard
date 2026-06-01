@@ -13,6 +13,8 @@ public class GameHandler : MonoBehaviour
     public event Action<int> ScoreChanged;
     public event Action<AbstractItem> OnItemCollected;
 
+    public RunData runData;
+
     [Header("Tilemaps")]
     [SerializeField] private Tilemap _floorMap;
     [SerializeField] private Tilemap _wallMap;
@@ -20,11 +22,22 @@ public class GameHandler : MonoBehaviour
     public Tilemap WallMap => _wallMap;
     public AStarPathfinder Pathfinder { get; private set; }
 
-    [Header("DungeonGeneration")]
+    [Header("DungeonGenerationConfig")]
     [SerializeField] private SimpleRandomWalkData _walkData;
     [SerializeField] private WallGenerationParameters _wallParameters;
     [SerializeField] private SecretRoomParameters _secretRoomParameters;
-    [SerializeField] private DungeonData _dungeonParameters;
+    [SerializeField] private DungeonData _baseDungeonParameters;
+    [SerializeField] private LevelScalingConfig _levelScalingConfig;
+
+    private int minRoomWidth;
+    private int minRoomHeight;
+    private int minRoomCount;
+    private int maxRoomCount;
+    private int maxRoomWidth;
+    private int maxRoomHeight;
+
+    private int dungeonWidth;
+    private int dungeonHeight;
 
     private TilemapVisualizer _tilemapVisualizer;
     private RoomFirstDungeonGenerator _generator;
@@ -81,7 +94,12 @@ public class GameHandler : MonoBehaviour
     {
         instance = this;
         _tilemapVisualizer = new TilemapVisualizer(_floorMap, _wallMap);
-        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, _walkData, _dungeonParameters, _wallParameters, _secretRoomParameters);
+        runData.currentLevel = 1;
+        SetBaseParameters();
+        var dungeonParams = new DungeonData();
+        ApplyDungeonParameters(dungeonParams);
+        ApplyLevelScaling(runData.currentLevel);
+        _generator = new RoomFirstDungeonGenerator(_tilemapVisualizer, _walkData, dungeonParams, _wallParameters, _secretRoomParameters);
         _generator.GenerateDungeon();
 
         Pathfinder = new AStarPathfinder(_floorMap, _wallMap);
@@ -115,10 +133,62 @@ public class GameHandler : MonoBehaviour
         }
     }
 
+    private void SaveRunData()
+    {
+        runData = _player.SaveRunData();
+        runData.score = _score;
+        runData.currentLevel++;
+    }
+
     public void ModifyScore(int amount)
     {
         _score += amount;
         ScoreChanged?.Invoke(_score);
+    }
+
+    private void SetBaseParameters()
+    {
+        minRoomWidth = _baseDungeonParameters.minRoomWidth;
+        minRoomHeight = _baseDungeonParameters.minRoomHeight;
+        minRoomCount = _baseDungeonParameters.minRoomCount;
+        maxRoomCount = _baseDungeonParameters.maxRoomCount;
+        maxRoomWidth = _baseDungeonParameters.maxRoomWidth;
+        maxRoomHeight = _baseDungeonParameters.maxRoomHeight;
+
+        dungeonWidth = _baseDungeonParameters.dungeonWidth;
+        dungeonHeight = _baseDungeonParameters.dungeonHeight;
+    }
+
+    private void ApplyDungeonParameters(DungeonData data)
+    {
+        data.minRoomWidth = minRoomWidth;
+        data.minRoomHeight = minRoomHeight;
+        data.minRoomCount = minRoomCount;
+        data.maxRoomCount = maxRoomCount;
+        data.maxRoomWidth = maxRoomWidth;
+        data.maxRoomHeight = maxRoomHeight;
+
+        data.dungeonWidth = dungeonWidth;
+        data.dungeonHeight = dungeonHeight;
+    }
+
+    private void ApplyLevelScaling(int level)
+    {
+        _entitiesToSpawn = Mathf.RoundToInt(_levelScalingConfig.BaseEnemyCount * Mathf.Pow(_levelScalingConfig.EnemyCountMultiplyerPerLevel, level));
+
+        float healthMod = _levelScalingConfig.EnemyHealthScaling.Evaluate(level);
+        float roomSizeMod = _levelScalingConfig.RoomSizeScaling.Evaluate(level);
+        float dungeonSizeMod = _levelScalingConfig.DungeonSizeScaling.Evaluate(level);
+
+        minRoomWidth = Mathf.RoundToInt(minRoomWidth * roomSizeMod);
+        minRoomHeight = Mathf.RoundToInt(minRoomHeight * roomSizeMod);
+        minRoomCount = Mathf.RoundToInt(minRoomCount * roomSizeMod);
+        maxRoomCount = Mathf.RoundToInt(maxRoomCount * roomSizeMod);
+        maxRoomWidth = Mathf.RoundToInt(maxRoomWidth * roomSizeMod);
+        maxRoomHeight = Mathf.RoundToInt(maxRoomHeight * roomSizeMod);
+
+        dungeonWidth = Mathf.RoundToInt(dungeonWidth * dungeonSizeMod);
+        dungeonHeight = Mathf.RoundToInt(dungeonHeight * dungeonSizeMod);
     }
 
     private void SpawnEntities()

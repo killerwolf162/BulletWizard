@@ -279,4 +279,21 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         chestInRange = foundChest;
         staircaseInRange = foundStaircase;
     }
+
+    public RunData SaveRunData()
+    {
+        RunData playerData = new RunData();
+
+        playerData.maxHealth = _maxHealth;
+        playerData.currentHealth = _health;
+        playerData.maxMana = _maxMana;
+        playerData.currentMana = _mana;
+        playerData.baseManaCost = baseManaCost;
+        playerData.elementalManaCost = elementalManaCost;
+        playerData.fireBallManaCost = fireballManaCost;
+        playerData.manaRecoveryAmount = _manaRecoveryAmount;
+        playerData.manaRecoveryInterval = _manaRecoveryInterval;
+
+        return playerData;
+    }
 }
