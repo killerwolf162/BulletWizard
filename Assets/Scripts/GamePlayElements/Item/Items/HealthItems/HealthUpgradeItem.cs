@@ -9,6 +9,7 @@ public class HealthUpgradeItem : AbstractItem
         _amount = amount;
         Name = name;
         Description = $"Increases max HP by {amount}";
+        StatChange = $"+{amount} max HP";
     }
 
     public override void Apply(PlayerController player) => player.IncreaseMaxHP(_amount);

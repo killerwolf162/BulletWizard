@@ -11,6 +11,7 @@ public class GameHandler : MonoBehaviour
     public static GameHandler instance;
     public event Action OnPlayerDied;
     public event Action<int> ScoreChanged;
+    public event Action<AbstractItem> OnItemCollected;
 
     [Header("Tilemaps")]
     [SerializeField] private Tilemap _floorMap;
@@ -55,6 +56,13 @@ public class GameHandler : MonoBehaviour
     [SerializeField] private TMP_Text _scoreText;
     [SerializeField] private Image _bulletCooldownOverlay;
     [SerializeField] private Image _fireBallCooldownOverlay;
+
+    [Header("item pop-up ")]
+    public bool IsUIActive { get; set; } = false;
+    [SerializeField] private GameObject _itemPopupPanel;
+    [SerializeField] private TMP_Text _popupItemName;
+    [SerializeField] private TMP_Text _popupItemDescription;
+    [SerializeField] private TMP_Text _popupStatChange;
 
     public Camera cam;
 
@@ -148,7 +156,12 @@ public class GameHandler : MonoBehaviour
         Vector2Int cell = GetAnyFloorInRoom(roomFloors[_playerRoomIdx], roomCenters[_playerRoomIdx]);
         GameObject playerGo = Instantiate(_playerPrefab, FloorPosToWorld(cell), Quaternion.identity);
         _player = new PlayerController(playerGo, _elementDatas);
-        _hud = new PlayerHUD(_healthSlider, _manaSlider, _scoreText, _bulletCooldownOverlay, _fireBallCooldownOverlay, _player, _player.FireballAbility, _player.ShootBulletAbility);
+        _hud = new PlayerHUD(
+            _healthSlider, _manaSlider, _scoreText,
+            _bulletCooldownOverlay, _fireBallCooldownOverlay,
+            _player, _player.FireballAbility, _player.ShootBulletAbility,
+            _itemPopupPanel, _popupItemName, _popupItemDescription, _popupStatChange
+            );
     }
 
     private void SpawnSpawners(IReadOnlyList<Vector2Int> roomCenters, IReadOnlyList<List<Vector2Int>> roomFloors)
@@ -239,12 +252,15 @@ public class GameHandler : MonoBehaviour
         OnPlayerDied?.Invoke();
     }
 
-    public void OnChestOpened(ItemChest chest)
+    public void OnChestOpened(ItemChest chest, AbstractItem item)
     {
         Vector3 position = chest._gameObject.transform.position;
 
         Destroy(chest._gameObject);
         Instantiate(_openedItemChestPrefab, position, Quaternion.identity);
+
+        if (item != null)
+            OnItemCollected?.Invoke(item);
     }
 
     public GameObject InstantiateNew(GameObject gameObject)
@@ -260,5 +276,15 @@ public class GameHandler : MonoBehaviour
     public void TimedDestroyObject(GameObject objectToDestroy, float time)
     {
         Destroy(objectToDestroy, time);
+    }
+
+    public void ResumeTime()
+    {
+        Time.timeScale = 1;
+    }
+
+    public void StopTime()
+    {
+        Time.timeScale = 0;
     }
 }

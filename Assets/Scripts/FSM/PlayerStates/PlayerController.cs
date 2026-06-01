@@ -70,7 +70,6 @@ public class PlayerController : IStateRunner, ISceneObject, IAbilityActor, IShoo
         col = gameobject.GetComponent<Collider2D>();
 
         elementData.AddRange(elementList);
-        Debug.Log(elementList.Count);
         _basicElement = elementData[0];
         _fireData = elementData[1];
         _iceData = elementData[2];

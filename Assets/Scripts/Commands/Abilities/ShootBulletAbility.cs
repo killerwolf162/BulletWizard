@@ -38,6 +38,7 @@ public class ShootBulletAbility : AbilityBase, ICommand
     public void Execute()
     {
         if (_player.activeDecorator == null) return;
+        if (GameHandler.instance.IsUIActive == true) return;
         base.UseAbility();
     }
 }

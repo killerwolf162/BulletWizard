@@ -14,6 +14,7 @@ public class FireballAbility : AbilityBase, ICommand
 
     public void Execute()
     {
+        if (GameHandler.instance.IsUIActive == true) return;
         base.UseAbility();
     }
 

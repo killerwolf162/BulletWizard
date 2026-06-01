@@ -5,7 +5,7 @@ using UnityEngine;
 public class ItemChest
 {
     public static readonly Dictionary<Collider2D, ItemChest> collLookup = new Dictionary<Collider2D, ItemChest>();
-    public event Action<ItemChest> ChestOpened;
+    public event Action<ItemChest, AbstractItem> ChestOpened;
 
     [Header("General")]
     private Collider2D _col;
@@ -25,12 +25,14 @@ public class ItemChest
     {
         if (_item != null)
         {
-            // The item knows how to apply itself — the chest just calls it.
             _item.Apply(player);
-            Debug.Log($"Player received: {_item.Name} — {_item.Description}");
+            collLookup.Remove(_col);
+            ChestOpened?.Invoke(this, _item);
         }
-
-        collLookup.Remove(_col);
-        ChestOpened?.Invoke(this);
+        else
+        {
+            collLookup.Remove(_col);
+            ChestOpened?.Invoke(this, null);
+        }       
     }
 }
