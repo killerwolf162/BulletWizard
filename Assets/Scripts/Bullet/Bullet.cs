@@ -16,7 +16,7 @@ public class Bullet : IBullet, ISceneObject
 
     public event Action<Bullet> OnDie;
 
-    public GameObject gameobject => bullet;
+    public GameObject _gameObject => bullet;
     public GameObject bullet;
 
     private IShooter _shooter;
@@ -53,9 +53,7 @@ public class Bullet : IBullet, ISceneObject
     {
         timer += Time.deltaTime;
         if (timer > timeOutTime)
-        {
             Die();
-        }
 
         if (_col != null)
             CheckWallHit();
@@ -92,7 +90,6 @@ public class Bullet : IBullet, ISceneObject
             collLookup.Remove(_col);
 
         bullet.SetActive(false);
-
         timer = 0;
     }
 

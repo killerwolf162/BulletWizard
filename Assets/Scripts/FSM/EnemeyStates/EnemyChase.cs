@@ -24,7 +24,7 @@ public class EnemyChase : AState<EnemyBehaviour>
 
     public override void Update(EnemyBehaviour runner)
     {
-        if (runner.gameobject == null || GameHandler.instance == null)
+        if (runner._gameObject == null || GameHandler.instance == null)
             return;
 
         base.Update(runner);
@@ -55,18 +55,18 @@ public class EnemyChase : AState<EnemyBehaviour>
         }
 
         Vector3 targetPos = _currentPath[_currentWaypointIndex];
-        Vector3 currentPos = runner.gameobject.transform.position;
+        Vector3 currentPos = runner._gameObject.transform.position;
 
-        runner.gameobject.transform.position = Vector3.MoveTowards(currentPos, targetPos, runner.Speed * Time.deltaTime);
+        runner._gameObject.transform.position = Vector3.MoveTowards(currentPos, targetPos, runner.Speed * Time.deltaTime);
 
-        if (Vector3.Distance(runner.gameobject.transform.position, targetPos) < 0.1f)
+        if (Vector3.Distance(runner._gameObject.transform.position, targetPos) < 0.1f)
         {
             _currentWaypointIndex++;
         }
 
         if (_currentPath == null || _currentPath.Count == 0)
         {
-            runner.gameobject.transform.position = Vector3.MoveTowards(runner.gameobject.transform.position, runner._player.position, runner.Speed * Time.deltaTime);
+            runner._gameObject.transform.position = Vector3.MoveTowards(runner._gameObject.transform.position, runner._player.position, runner.Speed * Time.deltaTime);
             return;
         }
     }
@@ -88,7 +88,7 @@ public class EnemyChase : AState<EnemyBehaviour>
             return;
         }
         _currentPath = GameHandler.instance.Pathfinder.FindPath(
-            runner.gameobject.transform.position, runner._player.position);
+            runner._gameObject.transform.position, runner._player.position);
 
         _currentWaypointIndex = 0;
 

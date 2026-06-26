@@ -12,8 +12,15 @@ public class PlayerHUD : IUpdateable
     private readonly PlayerController _player;
     private readonly FireballAbility _fireball;
     private readonly ShootBulletAbility _bullet;
+    private readonly GameObject _itemPopupPanel;
+    private readonly TMP_Text _popupItemName;
+    private readonly TMP_Text _popupItemDescription;
+    private readonly TMP_Text _popupStatChange;
 
-    public PlayerHUD(Slider healthSlider, Slider manaSlider, TMP_Text scoreText, Image bulletCooldownOverlay, Image fireBallCooldownOverlay, PlayerController player, FireballAbility fireball, ShootBulletAbility bullet)
+    public PlayerHUD(Slider healthSlider, Slider manaSlider, TMP_Text scoreText, Image bulletCooldownOverlay, 
+        Image fireBallCooldownOverlay, PlayerController player, FireballAbility fireball, ShootBulletAbility bullet, 
+        GameObject itemPopupPanel, TMP_Text popupItemName,
+        TMP_Text popupItemDescription, TMP_Text popupStatChange)
     {
         _healthSlider = healthSlider;
         _manaSlider = manaSlider;
@@ -23,6 +30,13 @@ public class PlayerHUD : IUpdateable
         _player = player;
         _fireball = fireball;
         _bullet = bullet;
+
+        _itemPopupPanel = itemPopupPanel;
+        _popupItemName = popupItemName;
+        _popupItemDescription = popupItemDescription;
+        _popupStatChange = popupStatChange;
+
+        _itemPopupPanel.SetActive(false);
 
         _healthSlider.maxValue = _player.MaxHealth;
         _manaSlider.maxValue = _player.MaxMana;
@@ -36,6 +50,9 @@ public class PlayerHUD : IUpdateable
     {        
         _player.HealthChanged += OnHealthChanged;
         _player.ManaChanged += OnManaChanged;
+        _player.MaxHealthChanged += OnMaxHealthChanged;
+        _player.MaxManaChanged += OnMaxManaChanged;
+        GameHandler.instance.OnItemCollected += ShowItemPopup;
         GameHandler.instance.ScoreChanged += OnScoreChanged;
     }
 
@@ -49,11 +66,31 @@ public class PlayerHUD : IUpdateable
         _healthSlider.value = newValue;
     }
 
+    private void OnMaxManaChanged(int newValue)
+    {
+        _manaSlider.maxValue = newValue;
+    }
+
+    private void OnMaxHealthChanged(int newValue)
+    {
+        _healthSlider.maxValue = newValue;
+    }
+
     private void OnScoreChanged(int newValue)
     {
         _scoreText.text = $"Score: {newValue}";
     }
 
+    private void ShowItemPopup(AbstractItem item)
+    {
+        _popupItemName.text = item.Name;
+        _popupItemDescription.text = item.Description;
+        _popupStatChange.text = item.StatChange;
+
+        _itemPopupPanel.SetActive(true);
+        GameHandler.instance.IsUIActive = true;
+        Time.timeScale = 0;
+    }
     public void Update()
     {
         if (_fireball.CooldownProgress > 0)

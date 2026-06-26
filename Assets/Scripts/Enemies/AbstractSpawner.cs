@@ -3,7 +3,7 @@ using UnityEngine;
 
 public abstract class AbstractSpawner : ISceneObject
 {
-    public virtual GameObject gameobject { get; }
+    public virtual GameObject _gameObject { get; }
 
     protected readonly List<EnemyBehaviour> _ownedEnemies = new List<EnemyBehaviour>();
     public IReadOnlyList<EnemyBehaviour> OwnedEnemies => _ownedEnemies;
