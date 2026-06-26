@@ -12,14 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6786e4f6f4258f4a8dcbac8ab33c51c, type: 3}
   m_Name: ScalingDungeon
   m_EditorClassIdentifier: 
-  minRoomWidth: 0
-  minRoomHeight: 0
-  minRoomCount: 0
-  maxRoomCount: 0
-  maxRoomHeight: 0
-  maxRoomWidth: 0
-  dungeonWidth: 0
-  dungeonHeight: 0
+  minRoomWidth: 3
+  minRoomHeight: 3
+  minRoomCount: 3
+  maxRoomCount: 8
+  maxRoomHeight: 6
+  maxRoomWidth: 6
+  dungeonWidth: 15
+  dungeonHeight: 15
   randomWalkRooms: 1
   offset: 1
   mediumCorridorPercent: 0.25

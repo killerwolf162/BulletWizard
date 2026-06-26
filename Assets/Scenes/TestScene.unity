@@ -153,8 +153,8 @@ MonoBehaviour:
   _walkData: {fileID: 11400000, guid: 679bd074aa950fc408b43f28df865b07, type: 2}
   _wallParameters: {fileID: 11400000, guid: eeb7f0df826f6f64f81db7abce3fa75f, type: 2}
   _secretRoomParameters: {fileID: 11400000, guid: 35d012c9f67a6194281d6e38569dc03d, type: 2}
-  _baseDungeonParameters: {fileID: 11400000, guid: 91d196aa0c71f384fab92b949011b3a5, type: 2}
-  _levelScalingConfig: {fileID: 11400000, guid: a899bfa4372520a41ba63009e23bd4f0, type: 2}
+  _baseDungeonParameters: {fileID: 11400000, guid: e18d2333f6cabe34b8409c20bc678477, type: 2}
+  _levelScalingConfig: {fileID: 11400000, guid: aa2e4108b768ed9458574ffa9bd37b8c, type: 2}
   _playerPrefab: {fileID: 6459709845229553943, guid: fe12fe667e5fcba49ac504812ce0faff, type: 3}
   _enemySpawnerPrefab: {fileID: 865149010975879588, guid: fca6f39122af550418c62304f453081f, type: 3}
   _staircasePrefab: {fileID: 865149010975879588, guid: 8415749f6f5df21428984a06cbf4614c, type: 3}

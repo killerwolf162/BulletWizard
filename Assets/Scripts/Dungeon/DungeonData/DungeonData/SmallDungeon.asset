@@ -20,7 +20,7 @@ MonoBehaviour:
   maxRoomWidth: 5
   dungeonWidth: 20
   dungeonHeight: 20
-  randomWalkRooms: 1
+  randomWalkRooms: 0
   offset: 1
   mediumCorridorPercent: 0
   largeCorridorPercent: 0

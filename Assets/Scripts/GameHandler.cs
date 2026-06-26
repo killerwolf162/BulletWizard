@@ -88,6 +88,8 @@ public class GameHandler : MonoBehaviour
     {
         Application.targetFrameRate = 60;
         QualitySettings.vSyncCount = 0; // disable vsync so targetFrameRate takes effect
+        var runData = new RunData();
+        this.runData = runData;
     }
 
     private void Start()

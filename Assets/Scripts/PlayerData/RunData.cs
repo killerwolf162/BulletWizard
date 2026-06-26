@@ -14,5 +14,4 @@ public class RunData
     public float manaRecoveryInterval;
 
     public int currentLevel;
-
 }
